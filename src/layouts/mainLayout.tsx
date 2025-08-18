@@ -9,14 +9,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       style={{
         "--sidebar-width": "14rem",
         paddingTop: "1rem",
-      }}
+        display: "flex",
+      } as React.CSSProperties}
     >
       <AppSidebar />
       <main className="gap-2 flex justify-center w-[3rem]">
         <SidebarTrigger />
-        {/* <div className="flex min-h-svh flex-col flex-auto items-center justify-center">
-          <Button>Click me</Button>
-        </div> */}
       </main>
 
       <div className="flex flex-col flex-auto pr-[1rem]">

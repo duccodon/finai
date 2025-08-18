@@ -57,6 +57,7 @@ const CryptoChart: React.FC = () => {
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatKlineData = (kline: any[]): CandlestickData | null => {
     if (!kline || kline.length < 5) return null;
     return {
@@ -136,8 +137,8 @@ const CryptoChart: React.FC = () => {
       });
 
       const formattedData = response.data
-        .map(formatKlineData)
-        .filter((item): item is CandlestickData => item !== null);
+        .map(formatKlineData) 
+        .filter((item): item is CandlestickData => item !== null); 
 
       if (formattedData.length > 0) {
         candleSeriesRef.current?.setData(formattedData);
