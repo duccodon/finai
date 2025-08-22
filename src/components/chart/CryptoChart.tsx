@@ -16,13 +16,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+import BinanceDataViewer from "./searchCoin";
+
 
 const intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 
 const chartColors = {
   background: "#ffffff",
-  text: "#000000",
-  grid: "#2a2e39",
+  text: "#828282",
+  grid: "#d7d8d9",
   crosshair: "#6a6d78",
   panel: "#262a34",
   secondaryText: "#b2b5be",
@@ -102,7 +104,10 @@ const CryptoChart: React.FC = () => {
         timeVisible: true,
         secondsVisible: false,
         borderColor: chartColors.grid
-      }
+      },
+      rightPriceScale: {
+        borderColor: chartColors.grid,
+      },
     });
 
     const candleSeries = chart.addSeries(CandlestickSeries, {
@@ -300,7 +305,7 @@ const CryptoChart: React.FC = () => {
               <Label htmlFor="symbol" className="sr-only">Symbol</Label>
               <Input
                 id="symbol"
-                value={symbolInput}
+                value={symbol}
                 onChange={(e) => setSymbolInput(e.target.value)}
                 placeholder="Enter symbol (e.g., BTCUSDT)"
                 onKeyDown={(e) => e.key === 'Enter' && handleSymbolSelect()}
@@ -311,14 +316,14 @@ const CryptoChart: React.FC = () => {
             <DialogClose asChild>
               <Button type="button" variant="secondary">Cancel</Button>
             </DialogClose>
-            <Button type="button" onClick={handleSymbolSelect} disabled={!symbolInput.trim()}>
+            <Button type="button" onClick={handleSymbolSelect} disabled={!symbol.trim()}>
               Change Symbol
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <div className={`p-4 relative border border-[${borderColor}] rounded-[10px]`}>
+      <div className={`p-4 relative border rounded-[10px]`} style={{ borderColor: borderColor }}>
         {/* TradingView-like header */}
         <div className="flex flex-col mb-2">
           {/* First row */}
@@ -341,7 +346,8 @@ const CryptoChart: React.FC = () => {
                 {intervals.map((int) => (
                   <button
                     key={int}
-                    className={`py-2 px-3 text-xs rounded-[10px] border border-[${borderColor}] hover:border-white hover:bg-black hover:bg-opacity-10 transition-all ${interval === int ? `text-white bg-black ${chartColors.buttonActive}` : `${chartColors.secondaryText}`} hover:text-white`}
+                    className={`py-2 px-3 text-xs rounded-[10px] border hover:border-white hover:bg-black hover:bg-opacity-10 transition-all ${interval === int ? `text-white bg-black ${chartColors.buttonActive}` : `${chartColors.secondaryText}`} hover:text-white`}
+                    style={{ borderColor: borderColor }}
                     onClick={() => setInterval(int)}
                   >
                     {int}
@@ -419,6 +425,8 @@ const CryptoChart: React.FC = () => {
         </div>
 
         <div ref={chartContainerRef} id="candleChart" className="w-full min-h-[500px]" />
+
+        <BinanceDataViewer />
       </div>
     </>
   );
