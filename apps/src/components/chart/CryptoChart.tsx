@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-import BinanceDataViewer from "./searchCoin";
+//import BinanceDataViewer from "./searchCoin";
 
 
 const intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
@@ -426,7 +426,7 @@ const CryptoChart: React.FC = () => {
 
         <div ref={chartContainerRef} id="candleChart" className="w-full min-h-[500px]" />
 
-        <BinanceDataViewer />
+        {/* <BinanceDataViewer /> */}
       </div>
     </>
   );
