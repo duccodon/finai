@@ -1,15 +1,13 @@
-import './App.css'
-import CryptoChart from './components/chart/CryptoChart'
-import Layout from "@/layouts/mainLayout"
-import ChatPanel from "@/components/chat/ChatPanel"
+import { BrowserRouter } from 'react-router-dom';
+import Router from '@/routes';
+import './App.css';
 
 function App() {
   return (
-      <Layout>
-        <CryptoChart />
-        <ChatPanel />
-      </Layout>
-  )
+    <BrowserRouter>
+      <Router />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
