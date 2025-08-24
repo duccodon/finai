@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Outlet, Navigate, useRoutes } from "react-router-dom";
 import MainLayout from "@/layouts/mainLayout";
-import ProtectedRoute from "@/components/auth/protected.route";
+// import ProtectedRoute from "@/components/auth/protected.route";
 
 // Lazy load pages
 const HomePage = lazy(() => import("@/pages/homepage"));
@@ -20,7 +20,7 @@ export default function Router() {
     return useRoutes([
         {
             path: "/",
-            element: <ProtectedRoute />,
+            // element: <ProtectedRoute />,
             children: [
                 {
                     element: (
