@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +28,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
 
+import { createBacktest } from '@/services/backtestService';
+
 type BacktestItem = {
   id: string;
   name: string;
@@ -45,7 +47,7 @@ export default function BacktestHome() {
       createdAt: '2025-08-21',
     },
   ]);
-  function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
 
@@ -91,18 +93,24 @@ export default function BacktestHome() {
       },
     };
 
-    // MOCK hành vi “tạo xong”
-    const id = 'bt_' + Math.random().toString(36).slice(2, 7);
-    setItems((prev) => [
-      {
-        id,
-        name: `${symbol} ${timeframe}`,
-        symbol,
-        createdAt: new Date().toISOString().slice(0, 10),
-      },
-      ...prev,
-    ]);
+    // GỌI API Ở ĐÂY
+    try {
+      const res = await createBacktest(body);
+      console.log('Created backtest:', res);
 
+      // ví dụ thêm item mới vào list UI
+      setItems((prev) => [
+        {
+          id: res.id,
+          name: body.strategy.type + ' strategy',
+          symbol: body.symbol,
+          createdAt: new Date().toISOString().slice(0, 10),
+        },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error('Create failed:', err);
+    }
     // Debug xem body khớp chưa
     console.log('CreateBacktest (mock) body:', body);
 
@@ -333,8 +341,8 @@ export default function BacktestHome() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((row) => (
-                <TableRow key={row.id}>
+              {items.map((row, index) => (
+                <TableRow key={index}>
                   <TableCell className="font-medium">{row.name}</TableCell>
                   <TableCell>{row.symbol}</TableCell>
                   <TableCell>{row.createdAt}</TableCell>
