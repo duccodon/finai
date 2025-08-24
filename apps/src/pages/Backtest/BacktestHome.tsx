@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,26 +27,17 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
-
 import { createBacktest } from '@/services/backtestService';
+import { useBacktestList } from '@/hooks/useBacktests';
 
-type BacktestItem = {
-  id: string;
-  name: string;
-  symbol: string;
-  createdAt: string;
-};
-
+// formatter ngày giờ
+const fmt = new Intl.DateTimeFormat('vi-VN', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
 export default function BacktestHome() {
   const navigate = useNavigate();
-  const [items, setItems] = useState<BacktestItem[]>([
-    {
-      id: 'bt_001',
-      name: 'Mean Reversion v1',
-      symbol: 'BTCUSDT',
-      createdAt: '2025-08-21',
-    },
-  ]);
+  const { items, loading, error } = useBacktestList();
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -73,7 +64,7 @@ export default function BacktestHome() {
     const short_window = Number(fd.get('short_window') || 50);
     const long_window = 200; // default tạm thời
 
-    // Body theo schema (không include market_data theo yêu cầu)
+    // Body theo schema
     const body = {
       symbol,
       timeframe,
@@ -93,21 +84,11 @@ export default function BacktestHome() {
       },
     };
 
-    // GỌI API Ở ĐÂY
+    // Create new backtest
     try {
       const res = await createBacktest(body);
       console.log('Created backtest:', res);
-
-      // ví dụ thêm item mới vào list UI
-      setItems((prev) => [
-        {
-          id: res.id,
-          name: body.strategy.type + ' strategy',
-          symbol: body.symbol,
-          createdAt: new Date().toISOString().slice(0, 10),
-        },
-        ...prev,
-      ]);
+      navigate(`/backtest/${res.run_id}`);
     } catch (err) {
       console.error('Create failed:', err);
     }
@@ -117,6 +98,10 @@ export default function BacktestHome() {
     // Option: reset form hoặc đóng dialog (tuỳ bạn)
     (e.target as HTMLFormElement).reset();
   }
+
+  if (loading) return <div>Đang tải…</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!items) return <div>Chưa có backtest nào.</div>;
   return (
     <div className="space-y-4">
       <Card>
@@ -334,22 +319,26 @@ export default function BacktestHome() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Symbol</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Timeframe</TableHead>
+                <TableHead>Created At</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{row.name}</TableCell>
+                <TableRow key={row.run_id}>
+                  <TableCell>{index}</TableCell>
+                  <TableCell className="font-medium">{row.run_id}</TableCell>
                   <TableCell>{row.symbol}</TableCell>
-                  <TableCell>{row.createdAt}</TableCell>
+                  <TableCell>{row.timeframe}</TableCell>
+                  <TableCell>{fmt.format(new Date(row.created_at))}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="outline"
-                      onClick={() => navigate(`/backtest/${row.id}`)}
+                      onClick={() => navigate(`/backtest/${row.run_id}`)}
                     >
                       View
                     </Button>

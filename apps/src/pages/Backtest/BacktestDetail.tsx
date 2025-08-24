@@ -16,78 +16,37 @@ import {
   YAxis,
   Tooltip as RTooltip,
   ResponsiveContainer,
+  CartesianGrid,
+  Brush,
 } from 'recharts';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import type { BacktestDetailDTO, TradeDTO } from '@/types/backtest';
-
-// ===== MOCK OUTPUT (khớp schema backend) =====
-const mockDetail: BacktestDetailDTO = {
-  summary: {
-    symbol: 'BTCUSDT',
-    timeframe: '1h',
-    start: '2025-08-01',
-    end: '2025-08-22',
-    initial_capital: 10000,
-    final_equity: 10550,
-    total_return_pct: 5.5,
-    buy_and_hold_return_pct: 4.2,
-    max_drawdown_pct: -3.1,
-    profit_factor: 1.45,
-    num_trades: 10,
-    win_rate_pct: 54,
-  },
-  trades: [
-    {
-      id: 1,
-      side: 'LONG',
-      size: 0.1,
-      entry_time: '2025-08-20 10:00',
-      entry_price: 60000,
-      exit_time: '2025-08-20 16:00',
-      exit_price: 60500,
-      pnl: 50,
-      return_pct: 0.5,
-      duration: '6h',
-      reason: 'Signal',
-    },
-    {
-      id: 2,
-      side: 'SHORT',
-      size: 0.1,
-      entry_time: '2025-08-21 09:00',
-      entry_price: 61000,
-      exit_time: '2025-08-21 12:00',
-      exit_price: 60700,
-      pnl: 30,
-      return_pct: 0.3,
-      duration: '3h',
-      reason: 'TakeProfit',
-    },
-    // ... thêm vài mock trade nếu muốn
-  ],
-};
-
-// Chart equity (mock tạm)
-const mockEquity = [
-  { t: 'Day 1', eq: 10000 },
-  { t: 'Day 2', eq: 10120 },
-  { t: 'Day 3', eq: 9900 },
-  { t: 'Day 4', eq: 10550 },
-];
-
-// helpers format
-const pct = (v: number, d = 2) => `${v.toFixed(d)}%`;
-const num = (v: number, d = 2) => v.toFixed(d);
+import type { TradeDTO } from '@/types/backtest';
+import { useRunDetail, useEquity, useTrades } from '@/hooks/useBacktests';
+import { useMemo } from 'react';
+import { fmtDT, fmtD, num, pct } from '@/lib/date';
 
 export default function BacktestDetailPage() {
+  //router
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const s = mockDetail.summary;
-  const trades = mockDetail.trades;
+  //real data
+  const { run, loading: runLoading } = useRunDetail(id || null);
+  const { data: equity, loading: eqLoading } = useEquity(id || null);
+  const { items: trades, loading: tradesLoading } = useTrades(id || null);
 
+  const s = run?.summary;
+
+  const timeFmt = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' });
+
+  const equityData = useMemo(
+    () => (equity ?? []).map((p) => ({ ...p, ts: new Date(p.t).getTime() })),
+    [equity]
+  );
+  if (runLoading || eqLoading || tradesLoading) return <div>Loading...</div>;
+  if (!run) return <div>Run not found</div>;
   return (
     <Tabs defaultValue="chart" className="space-y-2">
       <div className="flex items-center gap-2">
@@ -100,7 +59,7 @@ export default function BacktestDetailPage() {
           <span className="sr-only">Back</span>
         </Button>
         <h2 className="text-xl font-semibold">
-          Backtest #{id} — {s.symbol} ({s.timeframe})
+          Backtest #{id} — {s?.symbol} ({s?.timeframe})
         </h2>
       </div>
 
@@ -117,11 +76,41 @@ export default function BacktestDetailPage() {
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockEquity}>
-                <XAxis dataKey="t" />
-                <YAxis />
-                <RTooltip />
-                <Line type="monotone" dataKey="eq" dot={false} />
+              <LineChart
+                data={equityData}
+                margin={{ top: 8, right: 16, bottom: 8, left: 8 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="ts"
+                  type="number"
+                  domain={['dataMin', 'dataMax']}
+                  tickFormatter={(ts) => timeFmt.format(ts as number)}
+                  interval="preserveStartEnd"
+                  minTickGap={40}
+                  tickCount={6}
+                />
+                <YAxis tickCount={6} allowDecimals={false} width={60} />
+                <RTooltip
+                  labelFormatter={(ts) => fmtDT(ts)}
+                  formatter={(v) => [
+                    Number(v).toLocaleString('vi-VN'),
+                    'Equity',
+                  ]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="eq"
+                  dot={false}
+                  strokeWidth={1.6}
+                  isAnimationActive={false}
+                />
+                <Brush
+                  dataKey="ts"
+                  height={20}
+                  travellerWidth={10}
+                  tickFormatter={(ts) => timeFmt.format(ts as number)}
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -179,11 +168,11 @@ export default function BacktestDetailPage() {
                         <TableCell>{t.side}</TableCell>
                         <TableCell>{num(t.size, 4)}</TableCell>
                         <TableCell className="whitespace-nowrap">
-                          {t.entry_time}
+                          {fmtDT(t.entry_time)}
                         </TableCell>
                         <TableCell>{num(t.entry_price, 2)}</TableCell>
                         <TableCell className="whitespace-nowrap">
-                          {t.exit_time}
+                          {fmtDT(t.exit_time)}
                         </TableCell>
                         <TableCell>{num(t.exit_price, 2)}</TableCell>
                         <TableCell
@@ -221,58 +210,58 @@ export default function BacktestDetailPage() {
             <CardHeader>
               <CardTitle>Total Return</CardTitle>
             </CardHeader>
-            <CardContent>{pct(s.total_return_pct)}</CardContent>
+            <CardContent>{s?.total_return_pct}</CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Max Drawdown</CardTitle>
             </CardHeader>
-            <CardContent>{pct(s.max_drawdown_pct)}</CardContent>
+            <CardContent>{s?.max_drawdown_pct}</CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Win Rate</CardTitle>
             </CardHeader>
-            <CardContent>{pct(s.win_rate_pct)}</CardContent>
+            <CardContent>{s?.win_rate_pct}</CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Profit Factor</CardTitle>
             </CardHeader>
-            <CardContent>{num(s.profit_factor, 2)}</CardContent>
+            <CardContent>{s?.profit_factor}</CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Final Equity</CardTitle>
             </CardHeader>
-            <CardContent>{num(s.final_equity, 2)}</CardContent>
+            <CardContent>{s?.final_equity}</CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Initial Capital</CardTitle>
             </CardHeader>
-            <CardContent>{num(s.initial_capital, 2)}</CardContent>
+            <CardContent>{s?.initial_capital}</CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Buy & Hold Return</CardTitle>
             </CardHeader>
-            <CardContent>{pct(s.buy_and_hold_return_pct)}</CardContent>
+            <CardContent>{s?.buy_and_hold_return_pct}</CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>#Trades</CardTitle>
             </CardHeader>
-            <CardContent>{s.num_trades}</CardContent>
+            <CardContent>{s?.num_trades}</CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>Period</CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
-              {s.start} → {s.end}
+              {fmtD(s?.start)} → {fmtD(s?.end)}
             </CardContent>
           </Card>
         </div>

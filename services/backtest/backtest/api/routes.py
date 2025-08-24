@@ -8,9 +8,10 @@ from backtest.core.metrics import max_drawdown_pct, profit_factor, buy_hold_retu
 from ..db import get_db
 from bson import ObjectId
 from datetime import datetime
-bp = Blueprint("api", __name__)
 
-@bp.route("/api/backtest/run", methods=["POST"])
+bp = Blueprint("backtest", __name__, url_prefix="/api/backtest")
+
+@bp.route("/run", methods=["POST"])
 def run_backtest():
     p = request.get_json(force=True)
     # ---- parse input
@@ -103,7 +104,7 @@ def run_backtest():
     return jsonify(payload), 201
 
 
-@bp.get("/api/backtest")
+@bp.get("/")
 def list_backtests():
     db = get_db()
     docs = db["backtest_runs"].find({}, {"summary": 1, "run_id": 1, "created_at": 1}).sort("created_at", -1)
@@ -115,28 +116,53 @@ def list_backtests():
         } for d in docs
     ])
 
-
-@bp.get("/api/backtest/<run_id>")
-def get_backtest_detail(run_id):
+@bp.get("/<run_id>/detail")
+def get_run_detail(run_id):
     db = get_db()
     run = db["backtest_runs"].find_one({"run_id": run_id}, {"_id": 0})
     if not run:
         return jsonify({"error": "not_found"}), 404
+    return jsonify(run)  # { run_id, created_at, summary, params, ...}
 
-    # optional query params: page/size
+@bp.get("/<run_id>/trades")
+def get_trades(run_id):
+    db = get_db()
     page = int(request.args.get("page", 1))
-    size = int(request.args.get("size", 200))
+    size = int(request.args.get("size", 10))
     skip = (page - 1) * size
 
-    trades = list(db["backtest_trades"].find({"run_id": run_id}, {"_id": 0})
-                  .sort("seq", 1).skip(skip).limit(size))
-    equity = list(db["backtest_equity"].find({"run_id": run_id}, {"_id": 0})
-                  .sort("t", 1).skip(skip).limit(size))
+    cursor = (db["backtest_trades"]
+              .find({"run_id": run_id}, {"_id": 0})
+              .sort("seq", 1)
+              .skip(skip)
+              .limit(size))
+    items = list(cursor)
+    total = db["backtest_trades"].count_documents({"run_id": run_id})
 
     return jsonify({
-        "run": run,
-        "trades": trades,
-        "equity_curve": equity,
+        "items": items,
         "page": page,
         "size": size,
+        "total": total,
+        "has_more": page * size < total
     })
+
+
+@bp.get("/<run_id>/equity")
+def get_equity(run_id):
+    """Full curve; optional range for tương lai."""
+    db = get_db()
+    # optional range:
+    frm = request.args.get("from")  # ISO
+    to  = request.args.get("to")    # ISO
+    q = {"run_id": run_id}
+    if frm or to:
+        rng = {}
+        if frm: rng["$gte"] = frm
+        if to:  rng["$lte"] = to
+        q["t"] = rng
+
+    pts = list(db["backtest_equity"]
+               .find(q, {"_id": 0, "run_id": 0})
+               .sort("t", 1))
+    return jsonify(pts)

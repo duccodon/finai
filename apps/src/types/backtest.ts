@@ -35,7 +35,7 @@ export type TradeDTO = {
   pnl: number;
   return_pct: number;
   duration: string;
-  reason: 'Signal' | 'StopLoss' | 'TakeProfit';
+  reason: 'SignalChange' | 'StopLoss' | 'TakeProfit';
 };
 
 export type SummaryDTO = {
@@ -53,33 +53,24 @@ export type SummaryDTO = {
   win_rate_pct: number;
 };
 
+export type BacktestListItem = SummaryDTO & {
+  run_id: string;
+  created_at: string; // ISO
+};
+
 export type BacktestDetailDTO = {
+  run_id: string;
+  created_at: string; // ISO
   summary: SummaryDTO;
-  trades: TradeDTO[];
+  params: any; // có thể type-safe sau
 };
 
 // List item tuỳ backend của bạn trả gì (mock trước)
-export type BacktestListItem = {
-  run_id: string;
-  created_at: string; // ISO string
-  symbol: string;
-  timeframe: string;
-  start: string;
-  end: string;
-  initial_capital: number;
-  final_equity: number;
-  total_return_pct: number;
-  buy_and_hold_return_pct: number;
-  max_drawdown_pct: number;
-  profit_factor: number;
-  num_trades: number;
-  win_rate_pct: number;
-};
 
 export interface EquityPoint {
   t: string;
-  equity: number;
+  eq: number;
 }
 
 // Common API response shapes (nếu cần)
-export type IdResponse = { id: string };
+export type IdResponse = { run_id: string };

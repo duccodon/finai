@@ -5,6 +5,7 @@ from .db import get_db
 def create_app():
     app = Flask(__name__)
     app.register_blueprint(backtest_bp)
+    app.url_map.strict_slashes = False 
     # health check
     @app.route("/ping")
     def ping():
