@@ -5,7 +5,9 @@ from backtest.data.loader_csv import fetch_klines_all
 from backtest.core.strategies.ma_cross import prepare_ma_cross
 from backtest.core.engine import backtest_engine, clean_backtest_result
 from backtest.core.metrics import max_drawdown_pct, profit_factor, buy_hold_return_pct
-
+from ..db import get_db
+from bson import ObjectId
+from datetime import datetime
 bp = Blueprint("api", __name__)
 
 @bp.route("/api/backtest/run", methods=["POST"])
@@ -23,7 +25,6 @@ def run_backtest():
         strategy=StrategyCfg(**p["strategy"])
     )
 
-    # ---- load data (CSV dev)
     #df = load_csv(runreq.symbol, runreq.timeframe, runreq.start_date, runreq.end_date)
     df = fetch_klines_all(runreq.symbol, runreq.timeframe, runreq.start_date, runreq.end_date)
     print("Số nến:", len(df))
@@ -70,9 +71,72 @@ def run_backtest():
             * 100.0, 2
         )
     }
+            # ---------- LƯU VÀO MONGO ----------
+    run_oid = ObjectId()
+    run_id = f"bt_{run_oid}"  # string tiện cho FE
+    db = get_db()
+    db["backtest_runs"].insert_one({
+        "_id": run_oid,
+        "run_id": run_id,
+        "created_at": datetime.utcnow(),
+        "params": p,         # lưu nguyên params FE gửi lên
+        "summary": summary,  # lưu summary đã tính
+    })
 
-    return jsonify(clean_backtest_result({
+    if trades:
+        db["backtest_trades"].insert_many(
+            [{ "run_id": run_id, **t } for t in trades]
+        )
+
+    if equity:
+        db["backtest_equity"].insert_many(
+            [{ "run_id": run_id, **pt } for pt in equity]
+        )
+
+    # ---------- TRẢ VỀ JSON ----------
+    payload = clean_backtest_result({
+        "run_id": run_id,
         "summary": summary,
         "trades": trades,
-        "equity_curve": equity
-    }))
+        "equity_curve": equity,
+    })
+    return jsonify(payload), 201
+
+
+@bp.get("/api/backtest")
+def list_backtests():
+    db = get_db()
+    docs = db["backtest_runs"].find({}, {"summary": 1, "run_id": 1, "created_at": 1}).sort("created_at", -1)
+    return jsonify([
+        {
+            "run_id": d["run_id"],
+            "created_at": d["created_at"].isoformat(),
+            **d["summary"],
+        } for d in docs
+    ])
+
+
+@bp.get("/api/backtest/<run_id>")
+def get_backtest_detail(run_id):
+    db = get_db()
+    run = db["backtest_runs"].find_one({"run_id": run_id}, {"_id": 0})
+    if not run:
+        return jsonify({"error": "not_found"}), 404
+
+    # optional query params: page/size
+    page = int(request.args.get("page", 1))
+    size = int(request.args.get("size", 200))
+    skip = (page - 1) * size
+
+    trades = list(db["backtest_trades"].find({"run_id": run_id}, {"_id": 0})
+                  .sort("seq", 1).skip(skip).limit(size))
+    equity = list(db["backtest_equity"].find({"run_id": run_id}, {"_id": 0})
+                  .sort("t", 1).skip(skip).limit(size))
+
+    return jsonify({
+        "run": run,
+        "trades": trades,
+        "equity_curve": equity,
+        "page": page,
+        "size": size,
+    })
