@@ -4,7 +4,7 @@ from backtest.schemas import RunRequest, CapitalCfg, BacktestCfg, StrategyCfg
 from backtest.data.loader_csv import fetch_klines_all
 from backtest.core.strategies.ma_cross import prepare_ma_cross
 from backtest.core.engine import backtest_engine, clean_backtest_result
-from backtest.core.metrics import max_drawdown_pct, profit_factor, buy_hold_return_pct
+from backtest.core.metrics import max_drawdown_pct, profit_factor, buy_hold_return_pct, win_rate_pct
 from ..db import get_db
 from bson import ObjectId
 from datetime import datetime
@@ -67,10 +67,7 @@ def run_backtest():
         "max_drawdown_pct": max_drawdown_pct(equity),
         "profit_factor": profit_factor(trades),
         "num_trades": len([t for t in trades if "exit_time" in t]),
-        "win_rate_pct": round(
-            (sum(1 for t in trades if t.get("pnl",0) > 0) / max(1, len([t for t in trades if "exit_time" in t])))
-            * 100.0, 2
-        )
+        "win_rate_pct": win_rate_pct(trades),
     }
             # ---------- LƯU VÀO MONGO ----------
     run_oid = ObjectId()

@@ -48,21 +48,28 @@ export default function BacktestHome() {
     const start_date = String(fd.get('start_date') || '');
     const end_date = String(fd.get('end_date') || '');
     const initial = Number(fd.get('initial') || 10000);
-    const position_pct = Number(fd.get('position_pct') || 0.5);
+    const position_pct = Number(fd.get('position_pct') || 50); //50%
     const leverage = Number(fd.get('leverage') || 1);
-    const fee_pct = Number(fd.get('fee_pct') || 0.001);
+    const fee_pct = Number(fd.get('fee_pct') || 0.1); //0.1%
 
     const allow_short = fd.get('allow_short') === 'on'; // checkbox
-    const slippage_pct = Number(fd.get('slippage_pct') || 0);
+    const slippage_pct = Number(fd.get('slippage_pct') || 0); //%
     const stop_loss_pct = fd.get('stop_loss_pct')
-      ? Number(fd.get('stop_loss_pct'))
+      ? Number(fd.get('stop_loss_pct')) //%
       : null;
     const take_profit_pct = fd.get('take_profit_pct')
-      ? Number(fd.get('take_profit_pct'))
+      ? Number(fd.get('take_profit_pct')) //%
       : null;
 
     const short_window = Number(fd.get('short_window') || 50);
-    const long_window = 200; // default tạm thời
+    const long_window = Number(fd.get('long_window') || 200);
+
+    //pct to num
+    const position_pct_num = position_pct / 100;
+    const fee_pct_num = fee_pct / 100;
+    const slippage_pct_num = slippage_pct / 100;
+    const stop_loss_pct_num = stop_loss_pct ? stop_loss_pct / 100 : null;
+    const take_profit_pct_num = take_profit_pct ? take_profit_pct / 100 : null;
 
     // Body theo schema
     const body = {
@@ -70,13 +77,18 @@ export default function BacktestHome() {
       timeframe,
       start_date,
       end_date,
-      capital: { initial, position_pct, leverage, fee_pct },
+      capital: {
+        initial,
+        position_pct: position_pct_num,
+        leverage,
+        fee_pct: fee_pct_num,
+      },
       backtest: {
         allow_short,
         order_type: 'market' as const,
-        slippage_pct,
-        stop_loss_pct: stop_loss_pct ?? undefined,
-        take_profit_pct: take_profit_pct ?? undefined,
+        slippage_pct: slippage_pct_num,
+        stop_loss_pct: stop_loss_pct_num ?? undefined,
+        take_profit_pct: take_profit_pct_num ?? undefined,
       },
       strategy: {
         type: 'MA_CROSS' as const,
@@ -210,8 +222,8 @@ export default function BacktestHome() {
                             id="position_pct"
                             name="position_pct"
                             type="number"
-                            step="0.01"
-                            defaultValue={0.5}
+                            step="1"
+                            defaultValue={50}
                           />
                         </div>
                       </div>
@@ -223,7 +235,7 @@ export default function BacktestHome() {
                             id="leverage"
                             name="leverage"
                             type="number"
-                            step="0.01"
+                            step="1"
                             defaultValue={1}
                           />
                         </div>
@@ -233,8 +245,8 @@ export default function BacktestHome() {
                             id="fee_pct"
                             name="fee_pct"
                             type="number"
-                            step="0.0001"
-                            defaultValue={0.001}
+                            step="0.1"
+                            defaultValue={0.1}
                           />
                         </div>
                       </div>
@@ -245,7 +257,7 @@ export default function BacktestHome() {
                           id="slippage_pct"
                           name="slippage_pct"
                           type="number"
-                          step="0.0001"
+                          step="0.1"
                           defaultValue={0}
                         />
                       </div>
@@ -289,8 +301,8 @@ export default function BacktestHome() {
                           id="stop_loss_pct"
                           name="stop_loss_pct"
                           type="number"
-                          step="0.0001"
-                          placeholder="0.03"
+                          step="1"
+                          placeholder="0"
                         />
                       </div>
                       <div className="grid gap-1">
@@ -299,8 +311,8 @@ export default function BacktestHome() {
                           id="take_profit_pct"
                           name="take_profit_pct"
                           type="number"
-                          step="0.0001"
-                          placeholder="0.03"
+                          step="1"
+                          placeholder="0"
                         />
                       </div>
                     </div>

@@ -23,6 +23,7 @@ export function useBacktestList() {
     try {
       const res = await listBacktests();
       setItems(res);
+      console.log('Fetched backtests:', res);
       setError(null);
     } catch (e) {
       console.error('listBacktests failed:', e);
@@ -75,8 +76,6 @@ export function useTrades(runId: string | null, page = 1, size = 200) {
     setLoading(true);
     try {
       const res = await getTrades(runId, page, size);
-      console.log('Fetched trades:', res);
-      console.log('typeof:', typeof res);
       setItems(res.items);
       setTotal(res.total);
     } finally {
