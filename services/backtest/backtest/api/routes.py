@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from backtest.schemas import RunRequest, CapitalCfg, BacktestCfg, StrategyCfg
 from backtest.data.loader_csv import fetch_klines_all
 from backtest.core.strategies.ma_cross import prepare_ma_cross
+from backtest.core.strategies.rsi_threshold import prepare_rsi_threshold
 from backtest.core.engine import backtest_engine, clean_backtest_result
 from backtest.core.metrics import max_drawdown_pct, profit_factor, buy_hold_return_pct, win_rate_pct
 from ..db import get_db
@@ -10,7 +11,15 @@ from bson import ObjectId
 from datetime import datetime
 
 bp = Blueprint("backtest", __name__, url_prefix="/api/backtest")
-
+STRATEGY_MAP = {
+    "MA_CROSS": lambda df, params: prepare_ma_cross(
+        df,
+        int(params.get("short_window", 20)),
+        int(params.get("long_window", 50))
+    ),
+    "RSI_THRESHOLD": lambda df, params: prepare_rsi_threshold(df, **params),
+    "MACD": lambda df, params: prepare_macd(df, **params),
+}
 @bp.route("/run", methods=["POST"])
 def run_backtest():
     p = request.get_json(force=True)
@@ -32,14 +41,13 @@ def run_backtest():
     # df: t, open, high, low, close, volume
 
     # ---- prepare signals
-    if runreq.strategy.type == "MA_CROSS":
-        sw = int(runreq.strategy.params.get("short_window", 20))
-        lw = int(runreq.strategy.params.get("long_window", 50))
-        df = prepare_ma_cross(df, sw, lw) #prepare data for MA_CROSS strategy
-    else:
-        return jsonify({"error":"strategy_not_supported"}), 400
+    strategy_type = runreq.strategy.type
+    if strategy_type not in STRATEGY_MAP:
+        return jsonify({"error": "strategy_not_supported"}), 400
 
-    # ---- run engine
+    # ---- data with signals
+    df = STRATEGY_MAP[strategy_type](df, runreq.strategy.params)
+
     result = backtest_engine(
         df=df,
         initial_capital=runreq.capital.initial,
@@ -47,10 +55,9 @@ def run_backtest():
         fee_pct=runreq.capital.fee_pct,
         slippage_pct=runreq.backtest.slippage_pct,
         allow_short=runreq.backtest.allow_short,
-        stop_loss_pct=runreq.backtest.stop_loss_pct,
-        take_profit_pct=runreq.backtest.take_profit_pct
+        stop_loss_pct=runreq.backtest.stop_loss_pct or 9999.0,
+        take_profit_pct=runreq.backtest.take_profit_pct or 9999.0,
     )
-
     trades = result["trades"]
     equity = result["equity_curve"]
     final_eq = result["final_equity"]

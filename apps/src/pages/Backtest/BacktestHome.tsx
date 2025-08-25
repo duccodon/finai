@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
 import { createBacktest } from '@/services/backtestService';
 import { useBacktestList } from '@/hooks/useBacktests';
@@ -35,9 +34,15 @@ const fmt = new Intl.DateTimeFormat('vi-VN', {
   dateStyle: 'medium',
   timeStyle: 'short',
 });
+
+type StrategyType = 'MA_CROSS' | 'RSI_THRESHOLD';
+
 export default function BacktestHome() {
   const navigate = useNavigate();
   const { items, loading, error } = useBacktestList();
+
+  const [strategyType, setStrategyType] = useState<StrategyType>('MA_CROSS');
+
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -48,28 +53,89 @@ export default function BacktestHome() {
     const start_date = String(fd.get('start_date') || '');
     const end_date = String(fd.get('end_date') || '');
     const initial = Number(fd.get('initial') || 10000);
-    const position_pct = Number(fd.get('position_pct') || 50); //50%
+    const position_pct = Number(fd.get('position_pct') || 50); // %
     const leverage = Number(fd.get('leverage') || 1);
-    const fee_pct = Number(fd.get('fee_pct') || 0.1); //0.1%
+    const fee_pct = Number(fd.get('fee_pct') || 0.1); // %
+    const slippage_pct = Number(fd.get('slippage_pct') || 0); // %
 
-    const allow_short = fd.get('allow_short') === 'on'; // checkbox
-    const slippage_pct = Number(fd.get('slippage_pct') || 0); //%
-    const stop_loss_pct = fd.get('stop_loss_pct')
-      ? Number(fd.get('stop_loss_pct')) //%
-      : null;
-    const take_profit_pct = fd.get('take_profit_pct')
-      ? Number(fd.get('take_profit_pct')) //%
-      : null;
+    // stoploss/takeprofit có thể để trống => null
+    const stop_loss_pct_raw = fd.get('stop_loss_pct');
+    const take_profit_pct_raw = fd.get('take_profit_pct');
 
-    const short_window = Number(fd.get('short_window') || 50);
-    const long_window = Number(fd.get('long_window') || 200);
+    const stop_loss_pct = stop_loss_pct_raw ? Number(stop_loss_pct_raw) : null; // %
+    const take_profit_pct = take_profit_pct_raw
+      ? Number(take_profit_pct_raw)
+      : null; // %
 
-    //pct to num
+    // pct → số thập phân
     const position_pct_num = position_pct / 100;
     const fee_pct_num = fee_pct / 100;
     const slippage_pct_num = slippage_pct / 100;
-    const stop_loss_pct_num = stop_loss_pct ? stop_loss_pct / 100 : null;
-    const take_profit_pct_num = take_profit_pct ? take_profit_pct / 100 : null;
+    const stop_loss_pct_num =
+      stop_loss_pct && stop_loss_pct >= 1 ? stop_loss_pct / 100 : null;
+    const take_profit_pct_num =
+      take_profit_pct && take_profit_pct >= 1 ? take_profit_pct / 100 : null;
+
+    // ==== Strategy params theo loại ====
+    let strategy:
+      | {
+          type: 'MA_CROSS';
+          params: { short_window: number; long_window: number };
+        }
+      | {
+          type: 'RSI_THRESHOLD';
+          params: { lower: number; upper: number; period: number };
+        };
+
+    if (strategyType === 'MA_CROSS') {
+      const short_window = Number(fd.get('short_window') || 50);
+      const long_window = Number(fd.get('long_window') || 200);
+      // (optional) FE-validate đơn giản
+      if (
+        !Number.isFinite(short_window) ||
+        !Number.isFinite(long_window) ||
+        short_window <= 0 ||
+        long_window <= 0
+      ) {
+        alert('Short/Long window phải là số dương.');
+        return;
+      }
+      if (short_window >= long_window) {
+        alert('Short window phải nhỏ hơn Long window.');
+        return;
+      }
+      strategy = {
+        type: 'MA_CROSS',
+        params: { short_window, long_window },
+      };
+    } else {
+      const lower = Number(fd.get('rsi_lower') || 30);
+      const upper = Number(fd.get('rsi_upper') || 70);
+      const period = Number(fd.get('rsi_period') || 14);
+
+      // Validate Lower/Upper theo yêu cầu
+      if (
+        !Number.isFinite(lower) ||
+        !Number.isFinite(upper) ||
+        lower < 0 ||
+        upper > 100
+      ) {
+        alert('RSI Lower/Upper phải nằm trong [0, 100].');
+        return;
+      }
+      if (!(lower < upper)) {
+        alert('RSI Lower phải nhỏ hơn RSI Upper.');
+        return;
+      }
+      if (!Number.isFinite(period) || period <= 0) {
+        alert('RSI Period phải là số dương.');
+        return;
+      }
+      strategy = {
+        type: 'RSI_THRESHOLD',
+        params: { lower, upper, period },
+      };
+    }
 
     // Body theo schema
     const body = {
@@ -84,36 +150,31 @@ export default function BacktestHome() {
         fee_pct: fee_pct_num,
       },
       backtest: {
-        allow_short,
+        allow_short: true,
         order_type: 'market' as const,
         slippage_pct: slippage_pct_num,
         stop_loss_pct: stop_loss_pct_num ?? undefined,
         take_profit_pct: take_profit_pct_num ?? undefined,
       },
-      strategy: {
-        type: 'MA_CROSS' as const,
-        params: { short_window, long_window },
-      },
+      strategy,
     };
 
-    // Create new backtest
     try {
       const res = await createBacktest(body);
-      console.log('Created backtest:', res);
       navigate(`/backtest/${res.run_id}`);
     } catch (err) {
       console.error('Create failed:', err);
+      alert('Tạo backtest thất bại. Vui lòng thử lại.');
     }
-    // Debug xem body khớp chưa
-    console.log('CreateBacktest (mock) body:', body);
 
-    // Option: reset form hoặc đóng dialog (tuỳ bạn)
     (e.target as HTMLFormElement).reset();
+    setStrategyType('MA_CROSS'); // reset UI
   }
 
   if (loading) return <div>Đang tải…</div>;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!items) return <div>Chưa có backtest nào.</div>;
+
   return (
     <div className="space-y-4">
       <Card>
@@ -142,34 +203,34 @@ export default function BacktestHome() {
                       Market &amp; Period
                     </h4>
                     <div className="grid gap-3">
-                      {/* Symbol + Timeframe */}
-                      <div className="grid gap-1">
-                        <Label>Symbol</Label>
-                        <Select name="symbol" defaultValue="BTCUSDT">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select symbol" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="BTCUSDT">BTCUSDT</SelectItem>
-                            <SelectItem value="ETHUSDT">ETHUSDT</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-1">
-                        <Label>Timeframe</Label>
-                        <Select name="timeframe" defaultValue="1h">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select timeframe" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1h">1h</SelectItem>
-                            <SelectItem value="4h">4h</SelectItem>
-                            <SelectItem value="1d">1d</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-1">
+                          <Label>Symbol</Label>
+                          <Select name="symbol" defaultValue="BTCUSDT">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select symbol" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="BTCUSDT">BTCUSDT</SelectItem>
+                              <SelectItem value="ETHUSDT">ETHUSDT</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-1">
+                          <Label>Timeframe</Label>
+                          <Select name="timeframe" defaultValue="1h">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select timeframe" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1h">1h</SelectItem>
+                              <SelectItem value="4h">4h</SelectItem>
+                              <SelectItem value="1d">1d</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
-                      {/* Dates */}
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="grid gap-1">
                           <Label htmlFor="start_date">Start date</Label>
@@ -190,12 +251,6 @@ export default function BacktestHome() {
                           />
                         </div>
                       </div>
-
-                      {/* Allow short */}
-                      <div className="flex items-center gap-2 pt-1">
-                        <Checkbox id="allow_short" name="allow_short" />
-                        <Label htmlFor="allow_short">Allow short</Label>
-                      </div>
                     </div>
                   </div>
 
@@ -207,7 +262,9 @@ export default function BacktestHome() {
                     <div className="grid gap-3">
                       <div className="grid gap-1 sm:grid-cols-2">
                         <div className="grid gap-1">
-                          <Label htmlFor="initial">Initial</Label>
+                          <Label htmlFor="initial">
+                            Initial Capital (USDT)
+                          </Label>
                           <Input
                             id="initial"
                             name="initial"
@@ -230,16 +287,6 @@ export default function BacktestHome() {
 
                       <div className="grid gap-1 sm:grid-cols-2">
                         <div className="grid gap-1">
-                          <Label htmlFor="leverage">Leverage</Label>
-                          <Input
-                            id="leverage"
-                            name="leverage"
-                            type="number"
-                            step="1"
-                            defaultValue={1}
-                          />
-                        </div>
-                        <div className="grid gap-1">
                           <Label htmlFor="fee_pct">Fee %</Label>
                           <Input
                             id="fee_pct"
@@ -249,17 +296,16 @@ export default function BacktestHome() {
                             defaultValue={0.1}
                           />
                         </div>
-                      </div>
-
-                      <div className="grid gap-1">
-                        <Label htmlFor="slippage_pct">Slippage %</Label>
-                        <Input
-                          id="slippage_pct"
-                          name="slippage_pct"
-                          type="number"
-                          step="0.1"
-                          defaultValue={0}
-                        />
+                        <div className="grid gap-1">
+                          <Label htmlFor="slippage_pct">Slippage %</Label>
+                          <Input
+                            id="slippage_pct"
+                            name="slippage_pct"
+                            type="number"
+                            step="0.1"
+                            defaultValue={0}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -269,32 +315,94 @@ export default function BacktestHome() {
                     <h4 className="mb-3 text-sm font-medium text-muted-foreground">
                       Strategy Configuration
                     </h4>
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <div className="grid gap-1">
-                        <Label>Type</Label>
-                        <Input value="MA_CROSS" disabled />
-                      </div>
-                      <div className="grid gap-1">
-                        <Label htmlFor="short_window">Short window</Label>
-                        <Input
-                          id="short_window"
-                          name="short_window"
-                          type="number"
-                          defaultValue={50}
-                        />
-                      </div>
-                      <div className="grid gap-1">
-                        <Label htmlFor="long_window">Long window</Label>
-                        <Input
-                          id="long_window"
-                          name="long_window"
-                          type="number"
-                          defaultValue={200}
-                        />
-                      </div>
+
+                    {/* Strategy Type */}
+                    <div className="grid gap-1 md:max-w-xs">
+                      <Label>Type</Label>
+                      <Select
+                        value={strategyType}
+                        onValueChange={(v: StrategyType) => setStrategyType(v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn strategy" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MA_CROSS">MA_CROSS</SelectItem>
+                          <SelectItem value="RSI_THRESHOLD">
+                            RSI_THRESHOLD
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    <div className="grid gap-3 md:grid-cols-2 mt-3">
+                    {/* Overlay params theo strategy */}
+                    {strategyType === 'MA_CROSS' ? (
+                      <div className="grid gap-3 md:grid-cols-3 mt-3">
+                        <div className="grid gap-1">
+                          <Label htmlFor="short_window">Short window</Label>
+                          <Input
+                            id="short_window"
+                            name="short_window"
+                            type="number"
+                            defaultValue={50}
+                          />
+                        </div>
+                        <div className="grid gap-1">
+                          <Label htmlFor="long_window">Long window</Label>
+                          <Input
+                            id="long_window"
+                            name="long_window"
+                            type="number"
+                            defaultValue={200}
+                          />
+                        </div>
+                        <div className="grid gap-1 opacity-0 pointer-events-none">
+                          {/* chừa chỗ cho layout */}
+                          <Input tabIndex={-1} aria-hidden />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid gap-3 md:grid-cols-3 mt-3">
+                        <div className="grid gap-1">
+                          <Label htmlFor="rsi_lower">RSI Lower (0-100)</Label>
+                          <Input
+                            id="rsi_lower"
+                            name="rsi_lower"
+                            type="number"
+                            step="1"
+                            min={0}
+                            max={100}
+                            defaultValue={30}
+                          />
+                        </div>
+                        <div className="grid gap-1">
+                          <Label htmlFor="rsi_upper">RSI Upper (0-100)</Label>
+                          <Input
+                            id="rsi_upper"
+                            name="rsi_upper"
+                            type="number"
+                            step="1"
+                            min={0}
+                            max={100}
+                            defaultValue={70}
+                          />
+                        </div>
+                        <div className="grid gap-1">
+                          <Label htmlFor="rsi_period">RSI Period</Label>
+                          <Input
+                            id="rsi_period"
+                            name="rsi_period"
+                            type="number"
+                            step="1"
+                            min={1}
+                            defaultValue={14}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SL / TP */}
+                    <div className="grid gap-3 md:grid-cols-2 mt-4">
                       <div className="grid gap-1">
                         <Label htmlFor="stop_loss_pct">Stop loss %</Label>
                         <Input
@@ -302,6 +410,7 @@ export default function BacktestHome() {
                           name="stop_loss_pct"
                           type="number"
                           step="1"
+                          min={1}
                           placeholder="0"
                         />
                       </div>
@@ -312,6 +421,7 @@ export default function BacktestHome() {
                           name="take_profit_pct"
                           type="number"
                           step="1"
+                          min={1}
                           placeholder="0"
                         />
                       </div>
@@ -327,6 +437,7 @@ export default function BacktestHome() {
             </DialogContent>
           </Dialog>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>

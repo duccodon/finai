@@ -2,6 +2,32 @@
 from flask import Flask, jsonify
 from .api.routes import bp as backtest_bp
 from .db import get_db
+from pymongo.errors import CollectionInvalid
+
+def init_mongo(db):
+    try:
+        db.create_collection("backtest_runs")
+    except CollectionInvalid:
+        pass
+
+    try:
+        db.create_collection("backtest_trades")
+    except CollectionInvalid:
+        pass
+
+    try:
+        db.create_collection("backtest_equity")
+    except CollectionInvalid:
+        pass
+
+    # y hệt script gốc
+    db["backtest_runs"].create_index([("symbol", 1), ("timeframe", 1), ("created_at", -1)])
+    db["backtest_trades"].create_index([("run_id", 1), ("id", 1)])
+    db["backtest_equity"].create_index([("run_id", 1), ("t", 1)])
+    print("Indexes created ✅")
+
+
+
 def create_app():
     app = Flask(__name__)
     app.register_blueprint(backtest_bp)
@@ -18,6 +44,10 @@ def create_app():
         db = get_db()
         result = db["backtests"].insert_one({"msg": "hello mongo"})
         return jsonify({"inserted_id": str(result.inserted_id)})
+    db = get_db()
+
+    # Gọi init ngay lúc khởi động (an toàn khi chạy nhiều lần)
+    init_mongo(db)
 
     return app
 

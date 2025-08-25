@@ -26,7 +26,7 @@ def clean_backtest_result(result):
             eq_ds.append(eq[-1])
         result["equity_curve"] = eq_ds
     return result
-
+ 
 
 def backtest_engine(df: pd.DataFrame,
                     initial_capital: float,
@@ -98,7 +98,6 @@ def backtest_engine(df: pd.DataFrame,
                         "id": trade_id, "side": "LONG",
                         "size": float(abs(qty)),
                         "entry_time": t, "entry_price": float(entry_price),
-                        "reason": "SignalEnter"
                     })
                     # if enter_after_exit:
                     #     print("Pending enter:", "Long" if pending_enter == 1 else "Short")
@@ -120,7 +119,6 @@ def backtest_engine(df: pd.DataFrame,
                         "id": trade_id, "side": "SHORT",
                         "size": float(abs(qty)),
                         "entry_time": t, "entry_price": float(entry_price),
-                        "reason": "SignalEnter"
                     })
                     # if enter_after_exit:
                     #     print("Pending enter:", "Long" if pending_enter == 1 else "Short")
@@ -175,11 +173,13 @@ def backtest_engine(df: pd.DataFrame,
                         "reason": reason
                     })
                     qty = 0.0; entry_price = None; entry_time = None
+                    pending_exit = False          
+                    pending_enter = None          
                     equity_curve.append({"t": t, "eq": float(cash)})
                     continue
 
         # (3) XỬ LÝ SIGNAL (strict theo signal, KHÔNG exit ngay bar hiện tại)
-        # - Nếu đang có vị thế và signal đổi (hoặc =0): đặt pending_exit=True
+        # - Nếu đang có vị thế và signal đổi: đặt pending_exit=True
         #   và pending_enter theo signal (nếu hợp lệ) cho OPEN bar kế.
         # - Nếu đang FLAT và signal ≠ 0: đặt pending_enter cho OPEN bar kế.
         if qty > 0:  # đang LONG
