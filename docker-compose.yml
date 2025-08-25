@@ -8,5 +8,10 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+  financial-news-service:
+    build: ./CrawlerAndSentiment  
+    container_name: financial-news-service
+    ports:
+      - "5003:5003"
 volumes:
   mongo_data:
