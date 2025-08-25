@@ -18,4 +18,4 @@ EXPOSE 5003
 
 # Command to run the application using Uvicorn
 # Points to main.py file and the 'app' object inside it
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5003"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5003", "--reload"]

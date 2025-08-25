@@ -21,3 +21,14 @@ pip freeze > requirements.txt
 **Test service**
 http://127.0.0.1:5003/api/v1/(routes)
 For example: http://127.0.0.1:5003/api/v1/news --> To access news router
+
+**Use with docker**
+Head to the directory of CrawlerAndSentiment
+
+Build the image: 
+docker build -t news-service .
+
+Run it: 
+docker run -p 5003:5003 news-service
+
+Visit http://localhost:5003/docs to see if the API docs load
