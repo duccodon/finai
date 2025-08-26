@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/notification";
 import { useAuth } from "@/contexts/auth/auth.helper";
 import { useLocation, useNavigate } from "react-router-dom";
+import * as authService from "@/services/authService";
 
 function AuthPage() {
     const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -35,71 +36,53 @@ function AuthPage() {
     const removeNote = (id: string) =>
         setNotes((s) => s.filter((x) => x.id !== id));
 
-    // Vite exposes only env vars prefixed with VITE_
-    const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
-
     const handleSubmit = async (data: Record<string, string>) => {
         try {
-            const endpoint =
-                mode === "signin"
-                    ? `${API_BASE}/api/auth/v1/signin`
-                    : `${API_BASE}/api/auth/v1/signup`;
-
-            const res = await axios.post(endpoint, data, {
-                withCredentials: true,
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const body = res.data ?? {};
-
             if (mode === "signin") {
-                if (body.accessToken) {
-                    setAuth(body.accessToken, body.user);
+                const res = await authService.signin({
+                    email: data.email,
+                    password: data.password,
+                });
+
+                if (res.accessToken) {
+                    setAuth(res.accessToken, res.user);
                     pushNote({
                         title: "Signed in",
                         description: "Login successfully",
                         variant: "success",
                     });
-
                     const target = from?.pathname
                         ? `${from.pathname || "/"}${from?.search ?? ""}`
                         : "/";
                     navigate(target, { replace: true });
-                } else {
-                    pushNote({
-                        title: "Signed in",
-                        description: "No access token returned",
-                        variant: "success",
-                    });
                 }
             } else {
+                // signup mode
+                await authService.signup({
+                    email: data.email,
+                    password: data.password,
+                    confirmPassword: data.confirmPassword,
+                    phone: data?.phone,
+                    username: data?.username,
+                });
                 setMode("signin");
                 pushNote({
-                    title: "Account created",
-                    description: "You can now sign in",
+                    title: "Account created successfully",
+                    description: "Now, you can sign in",
                     variant: "success",
                 });
             }
         } catch (err: unknown) {
             let messages: string[] = ["Authentication failed"];
-
             if (axios.isAxiosError(err)) {
                 const data = err.response?.data;
-                if (Array.isArray(data?.messages)) {
-                    messages = data.messages;
-                } else if (typeof data?.message === "string") {
-                    // single message (maybe joined by commas)
+                if (Array.isArray(data?.messages)) messages = data.messages;
+                else if (typeof data?.message === "string")
                     messages = [data.message];
-                } else if (typeof err.message === "string") {
+                else if (typeof err.message === "string")
                     messages = [err.message];
-                }
-            } else if (err instanceof Error) {
-                messages = [err.message];
-            } else {
-                messages = [String(err)];
-            }
-
-            // show each message (or combine)
+            } else if (err instanceof Error) messages = [err.message];
+            else messages = [String(err)];
             messages.forEach((m) =>
                 pushNote({
                     title: "Authentication error",

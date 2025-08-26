@@ -3,18 +3,40 @@ import { AuthService } from './services/auth.service';
 import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
 import type { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 interface RefreshTokenCookie {
   token: string;
   jti: string;
 }
 
-const COOKIE_NAME = process.env.COOKIE_NAME || 'Host-finai_rft';
-const REFRESH_TTL_MS = Number(process.env.REFRESH_TTL_DAYS || '30') * 24 * 60 * 60 * 1000;
+// fallback defaults (used only if ConfigService/.env missing)
+const DEFAULT_COOKIE_NAME = 'Host-finai_rft';
+const DEFAULT_REFRESH_TTL_DAYS = 30;
 
 @Controller('api/auth/v1')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly cookieName: string;
+  private readonly refreshTtlMs: number;
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {
+    // load from configService first, then env, then default
+    this.cookieName =
+      this.configService.get<string>('COOKIE_NAME') ??
+      process.env.COOKIE_NAME ??
+      DEFAULT_COOKIE_NAME;
+
+    const ttlDaysStr =
+      this.configService.get<string>('REFRESH_TTL_DAYS') ??
+      process.env.REFRESH_TTL_DAYS ??
+      String(DEFAULT_REFRESH_TTL_DAYS);
+
+    const ttlDays = Number(ttlDaysStr) || DEFAULT_REFRESH_TTL_DAYS;
+    this.refreshTtlMs = ttlDays * 24 * 60 * 60 * 1000;
+  }
 
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
@@ -28,13 +50,17 @@ export class AuthController {
     const { user, accessToken, refreshPlain, jti } = await this.authService.signin(dto);
 
     // set httpOnly secure cookie (client won't see the token in response body)
-    res.cookie(COOKIE_NAME, JSON.stringify({ token: refreshPlain, jti } as RefreshTokenCookie), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
-      maxAge: REFRESH_TTL_MS,
-      path: '/', // optionally restrict to /api/auth
-    });
+    res.cookie(
+      this.cookieName,
+      JSON.stringify({ token: refreshPlain, jti } as RefreshTokenCookie),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+        maxAge: this.refreshTtlMs,
+        path: '/', // optionally restrict to /api/auth
+      },
+    );
 
     // respond without refresh token
     return { user, accessToken };
@@ -43,7 +69,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const raw = req.cookies?.[COOKIE_NAME] as string | undefined;
+    const raw = req.cookies?.[this.cookieName] as string | undefined;
+
     if (!raw) return { error: 'no refresh token' };
 
     const { token: refreshToken, jti } = JSON.parse(raw) as RefreshTokenCookie;
@@ -54,12 +81,13 @@ export class AuthController {
       user,
     } = await this.authService.refresh(refreshToken, jti);
 
+    console.log('set cookie here!', this.refreshTtlMs);
     // rotate cookie
-    res.cookie(COOKIE_NAME, JSON.stringify({ token: newRefresh, jti: newJti }), {
+    res.cookie(this.cookieName, JSON.stringify({ token: newRefresh, jti: newJti }), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
-      maxAge: REFRESH_TTL_MS,
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: this.refreshTtlMs,
       path: '/', // optionally restrict to /api/auth
     });
 
