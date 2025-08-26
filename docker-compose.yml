@@ -1,14 +1,5 @@
 version: "3.9"
 services:
-    mongo:
-        image: mongo:7
-        container_name: mongo
-        restart: unless-stopped
-        ports:
-            - "27017:27017"
-        volumes:
-            - mongo_data:/data/db
-
     postgres:
         image: postgres:15-alpine
         container_name: postgres
@@ -32,6 +23,19 @@ services:
         volumes:
             - redis_data:/data
 
+    mongo:
+        image: mongo:7
+        container_name: mongo
+        restart: unless-stopped
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_data:/data/db
+    financial-news-service:
+        build: ./CrawlerAndSentiment
+        container_name: financial-news-service
+        ports:
+            - "5003:5003"
 volumes:
     mongo_data:
     pgdata:

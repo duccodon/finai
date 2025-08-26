@@ -1,0 +1,21 @@
+# Use an official Python runtime as a base image
+FROM python:3.11-slim-bookworm
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the requirements file first to leverage Docker cache
+COPY ./requirements.txt /app/requirements.txt
+
+# Install any needed dependencies specified in requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+# Copy the entire project structure into the container
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 5003
+
+# Command to run the application using Uvicorn
+# Points to main.py file and the 'app' object inside it
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5003", "--reload"]
