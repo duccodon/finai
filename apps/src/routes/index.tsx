@@ -21,7 +21,7 @@ export default function Router() {
     return useRoutes([
         {
             path: "/",
-            element: <ProtectedRoute />,
+            // element: <ProtectedRoute />,
             children: [
                 {
                     element: (
