@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
+import { TokenService } from './services/token.service';
 import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
 import type { Request, Response } from 'express';
@@ -21,6 +22,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private readonly configService: ConfigService,
   ) {
     // load from configService first, then env, then default
@@ -93,4 +95,6 @@ export class AuthController {
 
     return { accessToken, user };
   }
+
 }
+

@@ -1,0 +1,12 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Chạy NestJS ở chế độ dev (watch)
+CMD ["sh", "-lc", "npx prisma generate && npm run start:dev"]
+# CMD ["npm", "run", "start:dev"]

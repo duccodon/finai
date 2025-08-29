@@ -1,14 +1,12 @@
-import http from "@/lib/http";
-import type { AuthResponse, SigninRequest, SignupRequest } from "@/types/auth";
+import http from '@/lib/http';
+import type { AuthResponse, SigninRequest, SignupRequest } from '@/types/auth';
 
 /**
  * POST /api/auth/v1/signin
  * - returns { accessToken, user } and server sets httpOnly refresh cookie
  */
 export function signin(body: SigninRequest) {
-    return http.post<AuthResponse>("/auth/v1/signin", body, {
-        withCredentials: true,
-    });
+  return http.post<AuthResponse>('/auth/v1/signin', body);
 }
 
 /**
@@ -16,7 +14,7 @@ export function signin(body: SigninRequest) {
  * - returns user
  */
 export function signup(body: SignupRequest) {
-    return http.post<AuthResponse>("/auth/v1/signup", body);
+  return http.post<AuthResponse>('/auth/v1/signup', body);
 }
 
 /**
@@ -24,12 +22,5 @@ export function signup(body: SignupRequest) {
  * - returns {accessToken + user}
  */
 export function refresh() {
-    console.log("call to refresh here");
-    return http.post<AuthResponse>(
-        "/auth/v1/refresh",
-        {},
-        {
-            withCredentials: true,
-        }
-    );
+  return http.post<AuthResponse>('/auth/v1/refresh', {});
 }
