@@ -93,4 +93,30 @@ export class AuthController {
 
     return { accessToken, user };
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const rawCookieData = req.cookies?.[this.cookieName] as string | undefined;
+
+    if (rawCookieData) {
+      try {
+        const { token: refreshToken, jti } = JSON.parse(rawCookieData) as RefreshTokenCookie;
+        await this.authService.logout(refreshToken, jti);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // clear cookie data
+    res.cookie(this.cookieName, '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 0,
+      path: '/',
+    });
+
+    return { message: 'Logged out successfully!' };
+  }
 }

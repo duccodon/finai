@@ -22,16 +22,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         let mounted = true;
         (async () => {
             try {
-                console.log("call here to refresh after reload page");
                 const res = await authService.refresh();
-                console.log("res refresh >>>", res);
 
                 if (mounted && res.accessToken) {
                     setAccessToken(res.accessToken);
                     setUser(res.user ?? null);
                 }
-            } catch (_) {
+            } catch (err: unknown) {
                 // ignore: no valid refresh / not authenticated
+                console.log(err);
             } finally {
                 if (mounted) setIsBootstrapping(false);
             }

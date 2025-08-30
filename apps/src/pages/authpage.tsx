@@ -1,20 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthForm } from "@/components/form/sign";
 import axios from "axios";
-import {
-    NotificationList,
-    type Notification,
-} from "@/components/ui/notification";
+import { NotificationList } from "@/components/ui/notification";
 import { useAuth } from "@/contexts/auth/auth.helper";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as authService from "@/services/authService";
+import { useNotifications } from "@/hooks/push-notes";
 
 function AuthPage() {
     const [mode, setMode] = useState<"signin" | "signup">("signin");
 
     const navigate = useNavigate();
     const location = useLocation();
-    const { setAuth } = useAuth();
+    const { accessToken, setAuth } = useAuth();
 
     const from = (
         location.state as
@@ -23,18 +21,7 @@ function AuthPage() {
     )?.from;
 
     // notifications
-    const [notes, setNotes] = useState<Notification[]>([]);
-
-    const pushNote = (n: Omit<Notification, "id">) => {
-        const id = String(Date.now()) + Math.random().toString(36).slice(2, 8);
-        const item: Notification = { id, ...n };
-        setNotes((s) => [item, ...s]);
-        // auto remove after 5s
-        setTimeout(() => setNotes((s) => s.filter((x) => x.id !== id)), 5000);
-    };
-
-    const removeNote = (id: string) =>
-        setNotes((s) => s.filter((x) => x.id !== id));
+    const { notes, pushNote, removeNote } = useNotifications();
 
     const handleSubmit = async (data: Record<string, string>) => {
         try {
@@ -96,6 +83,12 @@ function AuthPage() {
     const toggleMode = () => {
         setMode(mode === "signin" ? "signup" : "signin");
     };
+
+    useEffect(() => {
+        if (accessToken) {
+            navigate("/", { replace: true });
+        }
+    }, [accessToken]);
 
     return (
         <>

@@ -24,9 +24,22 @@ export function signup(body: SignupRequest) {
  * - returns {accessToken + user}
  */
 export function refresh() {
-    console.log("call to refresh here");
     return http.post<AuthResponse>(
         "/auth/v1/refresh",
+        {},
+        {
+            withCredentials: true,
+        }
+    );
+}
+
+/**
+ * POST /api/auth/v1/logout
+ * - returns {message}
+ */
+export function logout() {
+    return http.post<{ message: string }>(
+        "/auth/v1/logout",
         {},
         {
             withCredentials: true,

@@ -57,4 +57,19 @@ export class AuthService {
 
     return { accessToken, refreshPlain: newPlain, jti: newJti, user };
   }
+
+  async logout(refreshPlain: string, jti: string) {
+    const stored = await this.sessionService.get(jti);
+    if (!stored) throw new UnauthorizedException('Refresh Token not existed!');
+
+    const expected = this.tokenService.hashRefresh(refreshPlain);
+    if (expected !== stored.refreshHash) {
+      await this.sessionService.revoke(jti);
+      throw new UnauthorizedException('Refresh Token not existed!');
+    }
+
+    // revoke the session after successful validation
+    await this.sessionService.revoke(jti);
+    return { message: 'Logged out successfully' };
+  }
 }
