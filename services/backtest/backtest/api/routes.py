@@ -170,3 +170,8 @@ def get_equity(run_id):
                .find(q, {"_id": 0, "run_id": 0})
                .sort("t", 1))
     return jsonify(pts)
+
+    
+@bp.route("/debug", methods=["GET", "POST"])
+def debug():
+    return jsonify({"msg": "debug ok"})

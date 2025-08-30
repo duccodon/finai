@@ -58,7 +58,6 @@ services:
       - '8080:80' # map port 8080 của host -> port 80 trong container
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      # Tuỳ chọn nhưng KHÁ KHUYÊN DÙNG: mount một thư mục conf.d rỗng
       - ./nginx/conf.d-empty/:/etc/nginx/conf.d:ro
     depends_on:
       - backtest

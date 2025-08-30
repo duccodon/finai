@@ -12,6 +12,15 @@ export class TokenService {
     return this.jwtService.signAsync(payload, { secret, expiresIn });
   }
 
+  async verifyToken(token: string): Promise<any> {
+    const secret = process.env.JWT_SECRET || 'jwt-secret';
+    try {
+      return await this.jwtService.verifyAsync(token, { secret });
+    } catch (err) {
+      return null; // Sai hoặc hết hạn
+    }
+  }
+
   generateRefreshPlain(): string {
     return randomBytes(32).toString('base64url'); // 256-bit opaque token
   }

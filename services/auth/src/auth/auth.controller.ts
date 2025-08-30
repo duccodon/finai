@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Get, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { TokenService } from './services/token.service';
 import { SigninDto } from 'src/dtos/signin.dto';
@@ -95,6 +95,26 @@ export class AuthController {
 
     return { accessToken, user };
   }
+  @Get('verify')
+  async verify(@Req() req: Request, @Res() res: Response) {
+    const authHeader = req.headers['authorization'];
 
+    // Nếu không có header Authorization → reject
+    if (!authHeader) {
+      return res.status(HttpStatus.UNAUTHORIZED).send();
+    }
+    console.log('authHeader:', authHeader);
+
+    const token = authHeader.split(' ')[1]; // Bỏ "Bearer"
+    try {
+      const payload = await this.tokenService.verifyToken(token);
+      if (payload) {
+        return res.status(HttpStatus.OK).send();
+      } else {
+        return res.status(HttpStatus.UNAUTHORIZED).send();
+      }
+    } catch (err) {
+      return res.status(HttpStatus.UNAUTHORIZED).send();
+    }
+  }
 }
-
