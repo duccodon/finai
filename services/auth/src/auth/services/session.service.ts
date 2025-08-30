@@ -15,14 +15,9 @@ export class SessionService {
   }
 
   // Create a session for user with multiple devices
-  async create(
-    userId: string,
-    refreshHash: string,
-    ttlSeconds: number,
-    meta: Record<string, unknown> = {},
-  ) {
+  async create(userId: string, refreshHash: string, ttlSeconds: number) {
     const jti = uuidv4();
-    const payload = { userId, refreshHash, meta };
+    const payload = { userId, refreshHash };
     await this.redis.set(this.key(jti), JSON.stringify(payload), 'EX', ttlSeconds);
     await this.redis.sadd(`user:${userId}:rts`, jti);
     await this.redis.expire(`user:${userId}:rts`, ttlSeconds);
@@ -32,9 +27,7 @@ export class SessionService {
   // Get session of user
   async get(jti: string) {
     const raw = await this.redis.get(this.key(jti));
-    return raw
-      ? (JSON.parse(raw) as { userId: string; refreshHash: string; meta?: Record<string, unknown> })
-      : null;
+    return raw ? (JSON.parse(raw) as { userId: string; refreshHash: string }) : null;
   }
 
   async revoke(jti: string) {
@@ -50,7 +43,7 @@ export class SessionService {
     await this.revoke(oldJti);
     await this.redis.set(
       this.key(newJti),
-      JSON.stringify({ userId: old.userId, refreshHash: newHash, meta: old.meta || {} }),
+      JSON.stringify({ userId: old.userId, refreshHash: newHash }),
       'EX',
       ttlSeconds,
     );

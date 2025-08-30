@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { TokenService } from './token.service';
 import { SessionService } from './session.service';
 import { UserService } from 'src/user/user.service';
@@ -6,6 +6,7 @@ import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
 import { User } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class AuthService {
@@ -13,10 +14,16 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
     private readonly sessionService: SessionService,
+    private readonly emailService: EmailService,
   ) {}
 
   private refreshTtlSeconds() {
     return Number(process.env.REFRESH_TTL_DAYS || '30') * 24 * 60 * 60;
+  }
+
+  private resetPasswordTtlSeconds() {
+    const RESET_PASS_MINUTES = 15;
+    return RESET_PASS_MINUTES * 60;
   }
 
   async signup(dto: SignupDto) {
@@ -26,11 +33,11 @@ export class AuthService {
   async signin(dto: SigninDto) {
     const user = await this.userService.signin(dto);
 
-    const accessToken = await this.tokenService.signAccess({ sub: user.id, email: user.email });
+    const accessToken = await this.tokenService.signToken({ sub: user.id, email: user.email });
     const refreshPlain = this.tokenService.generateRefreshPlain();
     const refreshHash = this.tokenService.hashRefresh(refreshPlain);
     const ttl = this.refreshTtlSeconds();
-    // create session, 
+    // create session,
     const jti = await this.sessionService.create(user.id, refreshHash, ttl);
 
     return { user, accessToken, refreshPlain, jti };
@@ -54,7 +61,7 @@ export class AuthService {
     await this.sessionService.rotate(jti, newJti, newHash, this.refreshTtlSeconds());
 
     const user = (await this.userService.findById(stored.userId)) as User;
-    const accessToken = await this.tokenService.signAccess({ sub: user.id, email: user.email });
+    const accessToken = await this.tokenService.signToken({ sub: user.id, email: user.email });
 
     return { accessToken, refreshPlain: newPlain, jti: newJti, user };
   }
@@ -73,4 +80,27 @@ export class AuthService {
     await this.sessionService.revoke(jti);
     return { message: 'Logged out successfully' };
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) throw new BadRequestException('User not found');
+
+    // const resetToken = await this.tokenService.signToken({ sub: user.id, email: user.email });
+    const ttl = this.resetPasswordTtlSeconds();
+
+    const resetToken = this.tokenService.generateRefreshPlain();
+    console.log('plain >>>', resetToken);
+    console.log('hash >>>', this.tokenService.hashRefresh(resetToken));
+
+    // await this.sessionService.create(user.id, resetToken, ttl);
+
+    // service sent email here
+    // await this.emailService.sendResetEmail(email, resetToken);
+
+    return { message: 'Reset Password link was sent to you' };
+  }
+
+  // async resetPassword(token: string, newPassword: string) {
+  //   const payload = this.tokenService.
+  // }
 }

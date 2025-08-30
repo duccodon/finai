@@ -5,6 +5,7 @@ import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
 import type { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { emit } from 'process';
 
 interface RefreshTokenCookie {
   token: string;
@@ -121,4 +122,17 @@ export class AuthController {
 
     return { message: 'Logged out successfully!' };
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: { email: string }) {
+    // call service forgotPassword here!
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  // @HttpCode(HttpStatus.OK)
+  // @Post('reset-password')
+  // async resetPassword(@Body() dto: {token: string, newPassword: string}) {
+  //   return
+  // }
 }
