@@ -6,9 +6,7 @@ import type { AuthResponse, SigninRequest, SignupRequest } from "@/types/auth";
  * - returns { accessToken, user } and server sets httpOnly refresh cookie
  */
 export function signin(body: SigninRequest) {
-    return http.post<AuthResponse>("/auth/v1/signin", body, {
-        withCredentials: true,
-    });
+    return http.post<AuthResponse>("/auth/v1/signin", body);
 }
 
 /**
@@ -24,13 +22,7 @@ export function signup(body: SignupRequest) {
  * - returns {accessToken + user}
  */
 export function refresh() {
-    return http.post<AuthResponse>(
-        "/auth/v1/refresh",
-        {},
-        {
-            withCredentials: true,
-        }
-    );
+    return http.post<AuthResponse>("/auth/v1/refresh", {});
 }
 
 /**

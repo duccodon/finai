@@ -1,20 +1,17 @@
 // ...existing code...
 import React, { useState, useEffect, type ReactNode } from "react";
-import axios from "axios";
 import { AuthContext, type User } from "./auth.context";
 import * as authService from "@/services/authService";
+import { setAccessTokenForHTTP } from "@/lib/http";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [user, setUser] = useState<User>(null);
     const [isBootstrapping, setIsBootstrapping] = useState(true);
 
+    // Khi token đổi, chỉ đẩy vào http qua setter (in-memory)
     useEffect(() => {
-        if (accessToken)
-            axios.defaults.headers.common[
-                "Authorization"
-            ] = `Bearer ${accessToken}`;
-        else delete axios.defaults.headers.common["Authorization"];
+        setAccessTokenForHTTP(accessToken);
     }, [accessToken]);
 
     // try refresh on mount (uses httpOnly cookie)
@@ -23,14 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (async () => {
             try {
                 const res = await authService.refresh();
+                console.log("res refresh >>>", res);
 
                 if (mounted && res.accessToken) {
                     setAccessToken(res.accessToken);
                     setUser(res.user ?? null);
                 }
-            } catch (err: unknown) {
+            } catch (_) {
                 // ignore: no valid refresh / not authenticated
-                console.log(err);
             } finally {
                 if (mounted) setIsBootstrapping(false);
             }
@@ -46,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     const clearAuth = () => {
         setAccessToken(null);
+        setAccessTokenForHTTP(null);
         setUser(null);
     };
 

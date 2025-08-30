@@ -30,6 +30,7 @@ export class AuthService {
     const refreshPlain = this.tokenService.generateRefreshPlain();
     const refreshHash = this.tokenService.hashRefresh(refreshPlain);
     const ttl = this.refreshTtlSeconds();
+    // create session, 
     const jti = await this.sessionService.create(user.id, refreshHash, ttl);
 
     return { user, accessToken, refreshPlain, jti };

@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from '@prisma/client';
-import bcrypt from 'node_modules/bcryptjs';
+import bcrypt from 'bcryptjs';
 import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
-import { PrismaService } from 'src/prisma/prisma.services';
+import { PrismaService } from 'prisma/prisma.services';
 
 type PublicUser = Omit<User, 'password'>;
 
