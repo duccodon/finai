@@ -1,11 +1,10 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { TokenService } from './token.service';
-import { SessionService } from './session.service';
+import { SessionService } from './session/session.service';
 import { UserService } from 'src/user/user.service';
 import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
 import { User } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from './email.service';
 
 @Injectable()
@@ -33,9 +32,9 @@ export class AuthService {
   async signin(dto: SigninDto) {
     const user = await this.userService.signin(dto);
 
-    const accessToken = await this.tokenService.signToken({ sub: user.id, email: user.email });
-    const refreshPlain = this.tokenService.generateRefreshPlain();
-    const refreshHash = this.tokenService.hashRefresh(refreshPlain);
+    const accessToken = await this.tokenService.signJwtToken({ sub: user.id, email: user.email });
+    const refreshPlain = this.tokenService.generateBase64Token();
+    const refreshHash = this.tokenService.hashBase64Token(refreshPlain);
     const ttl = this.refreshTtlSeconds();
     // create session,
     const jti = await this.sessionService.create(user.id, refreshHash, ttl);
@@ -47,21 +46,20 @@ export class AuthService {
     const stored = await this.sessionService.get(jti);
     if (!stored) throw new UnauthorizedException('Refresh Token not existed!');
 
-    const expected = this.tokenService.hashRefresh(refreshPlain);
-    if (expected !== stored.refreshHash) {
+    const expected = this.tokenService.hashBase64Token(refreshPlain);
+    if (expected !== stored.token) {
       // possible reuse -> revoke all
       await this.sessionService.revoke(jti);
       throw new UnauthorizedException('Refresh Token not existed!');
     }
 
     // rotate using SessionService.rotate to centralize behavior
-    const newPlain = this.tokenService.generateRefreshPlain();
-    const newHash = this.tokenService.hashRefresh(newPlain);
-    const newJti = uuidv4();
-    await this.sessionService.rotate(jti, newJti, newHash, this.refreshTtlSeconds());
+    const newPlain = this.tokenService.generateBase64Token();
+    const newHash = this.tokenService.hashBase64Token(newPlain);
+    const newJti = await this.sessionService.rotate(jti, newHash, this.refreshTtlSeconds());
 
     const user = (await this.userService.findById(stored.userId)) as User;
-    const accessToken = await this.tokenService.signToken({ sub: user.id, email: user.email });
+    const accessToken = await this.tokenService.signJwtToken({ sub: user.id, email: user.email });
 
     return { accessToken, refreshPlain: newPlain, jti: newJti, user };
   }
@@ -70,8 +68,8 @@ export class AuthService {
     const stored = await this.sessionService.get(jti);
     if (!stored) throw new UnauthorizedException('Refresh Token not existed!');
 
-    const expected = this.tokenService.hashRefresh(refreshPlain);
-    if (expected !== stored.refreshHash) {
+    const expected = this.tokenService.hashBase64Token(refreshPlain);
+    if (expected !== stored.token) {
       await this.sessionService.revoke(jti);
       throw new UnauthorizedException('Refresh Token not existed!');
     }
@@ -85,22 +83,29 @@ export class AuthService {
     const user = await this.userService.findByEmail(email);
     if (!user) throw new BadRequestException('User not found');
 
-    // const resetToken = await this.tokenService.signToken({ sub: user.id, email: user.email });
+    const resetToken = this.tokenService.generateBase64Token();
+    const hashResetToken = this.tokenService.hashBase64Token(resetToken);
     const ttl = this.resetPasswordTtlSeconds();
 
-    const resetToken = this.tokenService.generateRefreshPlain();
-    console.log('plain >>>', resetToken);
-    console.log('hash >>>', this.tokenService.hashRefresh(resetToken));
-
-    // await this.sessionService.create(user.id, resetToken, ttl);
+    const resetSessionId = await this.sessionService.createResetSession(
+      user.id,
+      hashResetToken,
+      ttl,
+    );
 
     // service sent email here
-    // await this.emailService.sendResetEmail(email, resetToken);
+    await this.emailService.sendResetEmail(email, resetSessionId);
 
-    return { message: 'Reset Password link was sent to you' };
+    return { message: 'Reset Password link was sent to you', resetSessionId };
   }
 
-  // async resetPassword(token: string, newPassword: string) {
-  //   const payload = this.tokenService.
-  // }
+  async resetPassword(resetSessionId: string, newPassword: string) {
+    const data = await this.sessionService.getResetToken(resetSessionId);
+    if (!data) throw new BadRequestException('Invalid or expire reset password session');
+
+    await this.userService.updatePassword(data.userId, newPassword);
+    await this.sessionService.deleteResetToken(resetSessionId);
+
+    return { message: 'Password reset successfully' };
+  }
 }

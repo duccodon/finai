@@ -49,7 +49,6 @@ export class AuthController {
   @Post('signin')
   async signin(@Body() dto: SigninDto, @Res({ passthrough: true }) res: Response) {
     const { user, accessToken, refreshPlain, jti } = await this.authService.signin(dto);
-
     // set httpOnly secure cookie (client won't see the token in response body)
     res.cookie(
       this.cookieName,
@@ -82,7 +81,6 @@ export class AuthController {
       user,
     } = await this.authService.refresh(refreshToken, jti);
 
-    console.log('set cookie here!', this.refreshTtlMs);
     // rotate cookie
     res.cookie(this.cookieName, JSON.stringify({ token: newRefresh, jti: newJti }), {
       httpOnly: true,
@@ -114,6 +112,7 @@ export class AuthController {
         return res.status(HttpStatus.UNAUTHORIZED).send();
       }
     } catch (err) {
+      console.error(err);
       return res.status(HttpStatus.UNAUTHORIZED).send();
     }
   }
@@ -147,13 +146,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('forgot-password')
   async forgotPassword(@Body() dto: { email: string }) {
-    // call service forgotPassword here!
     return this.authService.forgotPassword(dto.email);
   }
 
-  // @HttpCode(HttpStatus.OK)
-  // @Post('reset-password')
-  // async resetPassword(@Body() dto: {token: string, newPassword: string}) {
-  //   return
-  // }
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: { resetSessionId: string; newPassword: string }) {
+    return this.authService.resetPassword(dto.resetSessionId, dto.newPassword);
+  }
 }

@@ -62,9 +62,9 @@ export class EmailService {
     }
   }
 
-  async sendResetEmail(email: string, token: string): Promise<boolean> {
+  async sendResetEmail(email: string, resetSessionId: string): Promise<boolean> {
     try {
-      const resetUrl = `${this.configService.get<string>('FRONTEND_URL')}/reset-password?token=${token}`;
+      const resetUrl = `${this.configService.get<string>('FRONTEND_URL')}/reset-password?resetSessionId=${resetSessionId}`;
 
       const mailOptions: MailOptions = {
         from: this.configService.get<string>('EMAIL_USER') || '',

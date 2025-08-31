@@ -6,9 +6,10 @@ import { useAuth } from "@/contexts/auth/auth.helper";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as authService from "@/services/authService";
 import { useNotifications } from "@/hooks/push-notes";
+import { ForgotPasswordForm } from "@/components/form/forgot-password";
 
 function AuthPage() {
-    const [mode, setMode] = useState<"signin" | "signup">("signin");
+    const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -43,6 +44,16 @@ function AuthPage() {
                         : "/";
                     navigate(target, { replace: true });
                 }
+            } else if (mode === "forgot") {
+                // Handle forgot password submission
+                await authService.forgotPassword(data.email);
+                pushNote({
+                    title: "Reset email sent",
+                    description:
+                        "Check your email for password reset instructions",
+                    variant: "success",
+                });
+                setMode("signin"); // Return to signin after successful submission
             } else {
                 // signup mode
                 await authService.signup({
@@ -84,6 +95,11 @@ function AuthPage() {
         setMode(mode === "signin" ? "signup" : "signin");
     };
 
+    const handleForgotPassword = (email: string) => {
+        // This is called from ForgotPasswordForm
+        handleSubmit({ email });
+    };
+
     useEffect(() => {
         if (accessToken) {
             navigate("/", { replace: true });
@@ -93,11 +109,19 @@ function AuthPage() {
     return (
         <>
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <AuthForm
-                    mode={mode}
-                    onToggleMode={toggleMode}
-                    onSubmit={handleSubmit}
-                />
+                {mode === "forgot" ? (
+                    <ForgotPasswordForm
+                        onSubmit={handleForgotPassword}
+                        onBack={() => setMode("signin")}
+                    />
+                ) : (
+                    <AuthForm
+                        mode={mode}
+                        onToggleMode={toggleMode}
+                        onSubmit={handleSubmit}
+                        onForgotPassword={() => setMode("forgot")}
+                    />
+                )}
             </div>
 
             <NotificationList items={notes} onClose={removeNote} />

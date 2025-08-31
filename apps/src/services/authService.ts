@@ -38,3 +38,25 @@ export function logout() {
         }
     );
 }
+
+/**
+ * POST /api/auth/v1/forgot-password
+ * - returns {message}
+ */
+export function forgotPassword(email: string) {
+    console.log(email);
+    return http.post<{ message: string }>("/auth/v1/forgot-password", {
+        email,
+    });
+}
+
+/**
+ * POST /api/auth/v1/reset-password
+ * - returns {message}
+ */
+export function resetPassword(resetSessionId: string, newPassword: string) {
+    return http.post<{ message: string }>("/auth/v1/reset-password", {
+        resetSessionId,
+        newPassword,
+    });
+}

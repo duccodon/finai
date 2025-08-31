@@ -5,7 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.services';
 import { TokenService } from './services/token.service';
-import { SessionService } from './services/session.service';
+import { SessionService } from './services/session/session.service';
 import { EmailService } from './services/email.service';
 
 @Module({
