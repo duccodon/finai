@@ -2,8 +2,6 @@
 import axios, {
   type InternalAxiosRequestConfig,
   type AxiosRequestHeaders,
-  type AxiosError,
-  type AxiosRequestConfig,
 } from 'axios';
 
 // Instance chính cho toàn app

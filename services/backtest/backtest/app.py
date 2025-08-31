@@ -20,10 +20,10 @@ def init_mongo(db):
     except CollectionInvalid:
         pass
 
-    # y hệt script gốc
-    db["backtest_runs"].create_index([("symbol", 1), ("timeframe", 1), ("created_at", -1)])
-    db["backtest_trades"].create_index([("run_id", 1), ("id", 1)])
-    db["backtest_equity"].create_index([("run_id", 1), ("t", 1)])
+    db["backtest_runs"].create_index([("user_id", 1), ("created_at", -1)])
+    db["backtest_trades"].create_index([("run_id", 1), ("user_id", 1), ("seq", 1)])
+    db["backtest_trades"].create_index([("run_id", 1), ("user_id", 1)])  # cho count_documents
+    db["backtest_equity"].create_index([("run_id", 1), ("user_id", 1), ("t", 1)])
     print("Indexes created ✅")
 
 

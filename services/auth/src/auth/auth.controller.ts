@@ -107,6 +107,8 @@ export class AuthController {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const payload = await this.tokenService.verifyToken(token);
       if (payload) {
+        console.log('Verified payload:', payload);
+        res.setHeader('X-User-Id', payload.sub);
         return res.status(HttpStatus.OK).send();
       } else {
         return res.status(HttpStatus.UNAUTHORIZED).send();
