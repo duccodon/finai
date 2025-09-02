@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Outlet, Navigate, useRoutes } from "react-router-dom";
 import MainLayout from "@/layouts/mainLayout";
+import ProtectedRoute from "@/components/auth/protected.route";
+import ResetPasswordPage from "@/pages/reset-password-page";
 // import ProtectedRoute from "@/components/auth/protected.route";
 
 // Lazy load pages
@@ -20,7 +22,7 @@ export default function Router() {
     return useRoutes([
         {
             path: "/",
-            // element: <ProtectedRoute />,
+            element: <ProtectedRoute />,
             children: [
                 {
                     element: (
@@ -45,6 +47,15 @@ export default function Router() {
             element: (
                 <Suspense fallback={<LoadingSpinner />}>
                     <AuthPage />
+                </Suspense>
+            ),
+        },
+
+        {
+            path: "/reset-password",
+            element: (
+                <Suspense fallback={<LoadingSpinner />}>
+                    <ResetPasswordPage />
                 </Suspense>
             ),
         },

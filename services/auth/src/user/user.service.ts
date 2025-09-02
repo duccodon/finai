@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from '@prisma/client';
-import bcrypt from 'node_modules/bcryptjs';
+import bcrypt from 'bcryptjs';
 import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
-import { PrismaService } from 'src/prisma/prisma.services';
+import { PrismaService } from 'prisma/prisma.services';
 
 type PublicUser = Omit<User, 'password'>;
 
@@ -52,5 +52,18 @@ export class UserService {
 
   async findById(id: string) {
     return this.prismaService.user.findUnique({ where: { id } });
+  }
+
+  async updatePassword(userId: string, newPassword: string): Promise<PublicUser> {
+    const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('User not found');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return this.toPublic(updatedUser);
   }
 }

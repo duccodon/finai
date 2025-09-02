@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Load biến môi trường từ .env
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/Backtest-Service-DB")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/Backtest-Service-DB")
 
 @lru_cache(maxsize=1)
 def get_client() -> MongoClient:

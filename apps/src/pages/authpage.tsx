@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthForm } from "@/components/form/sign";
 import axios from "axios";
-import {
-    NotificationList,
-    type Notification,
-} from "@/components/ui/notification";
+import { NotificationList } from "@/components/ui/notification";
 import { useAuth } from "@/contexts/auth/auth.helper";
 import { useLocation, useNavigate } from "react-router-dom";
+import * as authService from "@/services/authService";
+import { useNotifications } from "@/hooks/push-notes";
+import { ForgotPasswordForm } from "@/components/form/forgot-password";
 
 function AuthPage() {
-    const [mode, setMode] = useState<"signin" | "signup">("signin");
+    const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
 
     const navigate = useNavigate();
     const location = useLocation();
-    const { setAuth } = useAuth();
+    const { accessToken, setAuth } = useAuth();
 
     const from = (
         location.state as
@@ -22,84 +22,65 @@ function AuthPage() {
     )?.from;
 
     // notifications
-    const [notes, setNotes] = useState<Notification[]>([]);
-
-    const pushNote = (n: Omit<Notification, "id">) => {
-        const id = String(Date.now()) + Math.random().toString(36).slice(2, 8);
-        const item: Notification = { id, ...n };
-        setNotes((s) => [item, ...s]);
-        // auto remove after 5s
-        setTimeout(() => setNotes((s) => s.filter((x) => x.id !== id)), 5000);
-    };
-
-    const removeNote = (id: string) =>
-        setNotes((s) => s.filter((x) => x.id !== id));
-
-    // Vite exposes only env vars prefixed with VITE_
-    const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
+    const { notes, pushNote, removeNote } = useNotifications();
 
     const handleSubmit = async (data: Record<string, string>) => {
         try {
-            const endpoint =
-                mode === "signin"
-                    ? `${API_BASE}/api/auth/v1/signin`
-                    : `${API_BASE}/api/auth/v1/signup`;
-
-            const res = await axios.post(endpoint, data, {
-                withCredentials: true,
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const body = res.data ?? {};
-
             if (mode === "signin") {
-                if (body.accessToken) {
-                    setAuth(body.accessToken, body.user);
+                const res = await authService.signin({
+                    email: data.email,
+                    password: data.password,
+                });
+
+                if (res.accessToken) {
+                    setAuth(res.accessToken, res.user);
                     pushNote({
                         title: "Signed in",
                         description: "Login successfully",
                         variant: "success",
                     });
-
                     const target = from?.pathname
                         ? `${from.pathname || "/"}${from?.search ?? ""}`
                         : "/";
                     navigate(target, { replace: true });
-                } else {
-                    pushNote({
-                        title: "Signed in",
-                        description: "No access token returned",
-                        variant: "success",
-                    });
                 }
+            } else if (mode === "forgot") {
+                // Handle forgot password submission
+                await authService.forgotPassword(data.email);
+                pushNote({
+                    title: "Reset email sent",
+                    description:
+                        "Check your email for password reset instructions",
+                    variant: "success",
+                });
+                setMode("signin"); // Return to signin after successful submission
             } else {
+                // signup mode
+                await authService.signup({
+                    email: data.email,
+                    password: data.password,
+                    confirmPassword: data.confirmPassword,
+                    phone: data?.phone,
+                    username: data?.username,
+                });
                 setMode("signin");
                 pushNote({
-                    title: "Account created",
-                    description: "You can now sign in",
+                    title: "Account created successfully",
+                    description: "Now, you can sign in",
                     variant: "success",
                 });
             }
         } catch (err: unknown) {
             let messages: string[] = ["Authentication failed"];
-
             if (axios.isAxiosError(err)) {
                 const data = err.response?.data;
-                if (Array.isArray(data?.messages)) {
-                    messages = data.messages;
-                } else if (typeof data?.message === "string") {
-                    // single message (maybe joined by commas)
+                if (Array.isArray(data?.messages)) messages = data.messages;
+                else if (typeof data?.message === "string")
                     messages = [data.message];
-                } else if (typeof err.message === "string") {
+                else if (typeof err.message === "string")
                     messages = [err.message];
-                }
-            } else if (err instanceof Error) {
-                messages = [err.message];
-            } else {
-                messages = [String(err)];
-            }
-
-            // show each message (or combine)
+            } else if (err instanceof Error) messages = [err.message];
+            else messages = [String(err)];
             messages.forEach((m) =>
                 pushNote({
                     title: "Authentication error",
@@ -114,14 +95,33 @@ function AuthPage() {
         setMode(mode === "signin" ? "signup" : "signin");
     };
 
+    const handleForgotPassword = (email: string) => {
+        // This is called from ForgotPasswordForm
+        handleSubmit({ email });
+    };
+
+    useEffect(() => {
+        if (accessToken) {
+            navigate("/", { replace: true });
+        }
+    }, [accessToken]);
+
     return (
         <>
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <AuthForm
-                    mode={mode}
-                    onToggleMode={toggleMode}
-                    onSubmit={handleSubmit}
-                />
+                {mode === "forgot" ? (
+                    <ForgotPasswordForm
+                        onSubmit={handleForgotPassword}
+                        onBack={() => setMode("signin")}
+                    />
+                ) : (
+                    <AuthForm
+                        mode={mode}
+                        onToggleMode={toggleMode}
+                        onSubmit={handleSubmit}
+                        onForgotPassword={() => setMode("forgot")}
+                    />
+                )}
             </div>
 
             <NotificationList items={notes} onClose={removeNote} />

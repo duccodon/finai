@@ -7,6 +7,7 @@ export type AuthContextType = {
     user: User;
     setAuth: (token: string | null, user?: User) => void;
     clearAuth: () => void;
+    isBootstrapping: boolean;
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(

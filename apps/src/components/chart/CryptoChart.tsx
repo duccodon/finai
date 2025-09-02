@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
-import { createChart, ColorType, CrosshairMode, type IChartApi, type ISeriesApi, type CandlestickData, CandlestickSeries } from "lightweight-charts";
-import axios from "axios";
-import { type UTCTimestamp } from "lightweight-charts";
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  createChart,
+  ColorType,
+  CrosshairMode,
+  type IChartApi,
+  type ISeriesApi,
+  type CandlestickData,
+  CandlestickSeries,
+} from 'lightweight-charts';
+import axios from 'axios';
+import { type UTCTimestamp } from 'lightweight-charts';
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -12,34 +20,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 //import BinanceDataViewer from "./searchCoin";
-
 
 const intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 
 const chartColors = {
-  background: "#ffffff",
-  text: "#828282",
-  grid: "#d7d8d9",
-  crosshair: "#6a6d78",
-  panel: "#262a34",
-  secondaryText: "#b2b5be",
-  upColor: "#26a69a",
-  downColor: "#ef5350",
-  green: "#26a69a",
-  red: "#ef5350",
-  buttonActive: "#3a3e4b",
-  buttonInactive: "#2a2e39"
+  background: '#ffffff',
+  text: '#828282',
+  grid: '#d7d8d9',
+  crosshair: '#6a6d78',
+  panel: '#262a34',
+  secondaryText: '#b2b5be',
+  upColor: '#26a69a',
+  downColor: '#ef5350',
+  green: '#26a69a',
+  red: '#ef5350',
+  buttonActive: '#3a3e4b',
+  buttonInactive: '#2a2e39',
 };
-const borderColor = "rgba(132,130,130,0.37)";
+const borderColor = 'rgba(132,130,130,0.37)';
 
 const CryptoChart: React.FC = () => {
-  const [symbol, setSymbol] = useState("LINKUSDT");
-  const [interval, setInterval] = useState("1m");
+  const [symbol, setSymbol] = useState('LINKUSDT');
+  const [interval, setInterval] = useState('1m');
   const [isConnected, setIsConnected] = useState(false);
   const [priceData, setPriceData] = useState({
     current: null as number | null,
@@ -47,16 +54,18 @@ const CryptoChart: React.FC = () => {
     low: null as number | null,
     open: null as number | null,
     change: null as number | null,
-    changePercent: null as number | null
+    changePercent: null as number | null,
   });
   const [searchSymbolDialogOpen, setSearchSymbolDialogOpen] = useState(false);
-  const [symbolInput, setSymbolInput] = useState("BTCUSDT");
-  const [hoveredCandle, setHoveredCandle] = useState<CandlestickData | null>(null);
+  const [symbolInput, setSymbolInput] = useState('BTCUSDT');
+  const [hoveredCandle, setHoveredCandle] = useState<CandlestickData | null>(
+    null
+  );
   const [isHovering, setIsHovering] = useState(false);
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +76,7 @@ const CryptoChart: React.FC = () => {
       open: parseFloat(kline[1]),
       high: parseFloat(kline[2]),
       low: parseFloat(kline[3]),
-      close: parseFloat(kline[4])
+      close: parseFloat(kline[4]),
     };
   };
 
@@ -77,11 +86,11 @@ const CryptoChart: React.FC = () => {
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: chartColors.background },
-        textColor: chartColors.text
+        textColor: chartColors.text,
       },
       grid: {
         vertLines: { color: chartColors.grid },
-        horzLines: { color: chartColors.grid }
+        horzLines: { color: chartColors.grid },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
@@ -89,21 +98,21 @@ const CryptoChart: React.FC = () => {
           color: chartColors.crosshair,
           width: 1,
           style: 2,
-          labelBackgroundColor: chartColors.buttonActive
+          labelBackgroundColor: chartColors.buttonActive,
         },
         horzLine: {
           color: chartColors.crosshair,
           width: 1,
           style: 2,
-          labelBackgroundColor: chartColors.buttonActive
-        }
+          labelBackgroundColor: chartColors.buttonActive,
+        },
       },
       width: chartContainerRef.current.clientWidth,
       height: 500,
       timeScale: {
         timeVisible: true,
         secondsVisible: false,
-        borderColor: chartColors.grid
+        borderColor: chartColors.grid,
       },
       rightPriceScale: {
         borderColor: chartColors.grid,
@@ -115,10 +124,10 @@ const CryptoChart: React.FC = () => {
       downColor: chartColors.downColor,
       borderVisible: false,
       wickUpColor: chartColors.upColor,
-      wickDownColor: chartColors.downColor
+      wickDownColor: chartColors.downColor,
     });
 
-    chart.subscribeCrosshairMove(param => {
+    chart.subscribeCrosshairMove((param) => {
       if (!param.point || !param.time) {
         setIsHovering(false);
         return;
@@ -132,18 +141,21 @@ const CryptoChart: React.FC = () => {
     chartRef.current = chart;
     candleSeriesRef.current = candleSeries;
 
-    console.log("Chart initialized with container:", chartContainerRef.current);
+    console.log('Chart initialized with container:', chartContainerRef.current);
   };
 
   const fetchHistoricalData = async () => {
     try {
-      const response = await axios.get("https://api.binance.com/api/v3/klines", {
-        params: { symbol: symbol.toUpperCase(), interval, limit: 1000 }
-      });
+      const response = await axios.get(
+        'https://api.binance.com/api/v3/klines',
+        {
+          params: { symbol: symbol.toUpperCase(), interval, limit: 1000 },
+        }
+      );
 
       const formattedData = response.data
-        .map(formatKlineData) 
-        .filter((item): item is CandlestickData => item !== null); 
+        .map(formatKlineData)
+        .filter((item): item is CandlestickData => item !== null);
 
       if (formattedData.length > 0) {
         candleSeriesRef.current?.setData(formattedData);
@@ -154,11 +166,12 @@ const CryptoChart: React.FC = () => {
           low: lastCandle.low,
           open: lastCandle.open,
           change: lastCandle.close - lastCandle.open,
-          changePercent: ((lastCandle.close - lastCandle.open) / lastCandle.open) * 100
+          changePercent:
+            ((lastCandle.close - lastCandle.open) / lastCandle.open) * 100,
         });
       }
     } catch (error) {
-      console.error("Error fetching historical data:", error);
+      console.error('Error fetching historical data:', error);
     }
   };
 
@@ -168,7 +181,9 @@ const CryptoChart: React.FC = () => {
       setIsConnected(false);
     }
 
-    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`);
+    const ws = new WebSocket(
+      `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`
+    );
 
     ws.onopen = () => setIsConnected(true);
     ws.onclose = () => setIsConnected(false);
@@ -179,21 +194,30 @@ const CryptoChart: React.FC = () => {
         const message = JSON.parse(event.data);
         if (message.k) {
           const kline = message.k;
-          const newCandle = formatKlineData([kline.t, kline.o, kline.h, kline.l, kline.c]);
+          const newCandle = formatKlineData([
+            kline.t,
+            kline.o,
+            kline.h,
+            kline.l,
+            kline.c,
+          ]);
           if (newCandle) {
             candleSeriesRef.current?.update(newCandle);
-            setPriceData(prev => ({
+            setPriceData((prev) => ({
               current: parseFloat(kline.c),
               high: Math.max(parseFloat(kline.h), prev.high || 0),
               low: Math.min(parseFloat(kline.l), prev.low || Infinity),
               open: parseFloat(kline.o),
               change: parseFloat(kline.c) - parseFloat(kline.o),
-              changePercent: ((parseFloat(kline.c) - parseFloat(kline.o)) / parseFloat(kline.o)) * 100
+              changePercent:
+                ((parseFloat(kline.c) - parseFloat(kline.o)) /
+                  parseFloat(kline.o)) *
+                100,
             }));
           }
         }
       } catch (error) {
-        console.error("Error processing WebSocket message:", error);
+        console.error('Error processing WebSocket message:', error);
       }
     };
 
@@ -232,37 +256,48 @@ const CryptoChart: React.FC = () => {
         }
 
         // Create new connection
-        ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`);
+        ws = new WebSocket(
+          `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`
+        );
         wsRef.current = ws;
 
         ws.onopen = () => active && setIsConnected(true);
         ws.onclose = () => active && setIsConnected(false);
-        ws.onerror = (error) => console.error("WebSocket error:", error);
+        ws.onerror = (error) => console.error('WebSocket error:', error);
 
         ws.onmessage = (event) => {
           try {
             const message = JSON.parse(event.data);
             if (message.k && active) {
               const kline = message.k;
-              const newCandle = formatKlineData([kline.t, kline.o, kline.h, kline.l, kline.c]);
+              const newCandle = formatKlineData([
+                kline.t,
+                kline.o,
+                kline.h,
+                kline.l,
+                kline.c,
+              ]);
               if (newCandle) {
                 candleSeriesRef.current?.update(newCandle);
-                setPriceData(prev => ({
+                setPriceData((prev) => ({
                   current: parseFloat(kline.c),
                   high: Math.max(parseFloat(kline.h), prev.high || 0),
                   low: Math.min(parseFloat(kline.l), prev.low || Infinity),
                   open: parseFloat(kline.o),
                   change: parseFloat(kline.c) - parseFloat(kline.o),
-                  changePercent: ((parseFloat(kline.c) - parseFloat(kline.o)) / parseFloat(kline.o)) * 100
+                  changePercent:
+                    ((parseFloat(kline.c) - parseFloat(kline.o)) /
+                      parseFloat(kline.o)) *
+                    100,
                 }));
               }
             }
           } catch (error) {
-            console.error("Error processing WebSocket message:", error);
+            console.error('Error processing WebSocket message:', error);
           }
         };
       } catch (error) {
-        console.error("Error in fetchAndConnect:", error);
+        console.error('Error in fetchAndConnect:', error);
       }
     };
 
@@ -277,12 +312,14 @@ const CryptoChart: React.FC = () => {
   useEffect(() => {
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
+        chartRef.current.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+        });
       }
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleSymbolSelect = () => {
@@ -294,15 +331,22 @@ const CryptoChart: React.FC = () => {
 
   return (
     <>
-      <Dialog open={searchSymbolDialogOpen} onOpenChange={setSearchSymbolDialogOpen}>
+      <Dialog
+        open={searchSymbolDialogOpen}
+        onOpenChange={setSearchSymbolDialogOpen}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Change Symbol</DialogTitle>
-            <DialogDescription>Enter a new cryptocurrency trading pair</DialogDescription>
+            <DialogDescription>
+              Enter a new cryptocurrency trading pair
+            </DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2">
             <div className="grid flex-1 gap-2">
-              <Label htmlFor="symbol" className="sr-only">Symbol</Label>
+              <Label htmlFor="symbol" className="sr-only">
+                Symbol
+              </Label>
               <Input
                 id="symbol"
                 value={symbol}
@@ -314,16 +358,25 @@ const CryptoChart: React.FC = () => {
           </div>
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
-              <Button type="button" variant="secondary">Cancel</Button>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="button" onClick={handleSymbolSelect} disabled={!symbol.trim()}>
+            <Button
+              type="button"
+              onClick={handleSymbolSelect}
+              disabled={!symbol.trim()}
+            >
               Change Symbol
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <div className={`p-4 relative border rounded-[10px]`} style={{ borderColor: borderColor }}>
+      <div
+        className={`p-4 relative border rounded-[10px]`}
+        style={{ borderColor: borderColor }}
+      >
         {/* TradingView-like header */}
         <div className="flex flex-col mb-2">
           {/* First row */}
@@ -339,14 +392,18 @@ const CryptoChart: React.FC = () => {
                     alt="Search"
                     className="w-4 h-4 opacity-70 hover:opacity-100"
                   />
-                  <div className='flex-1 text-center'>{symbol}</div>
+                  <div className="flex-1 text-center">{symbol}</div>
                 </div>
               </div>
               <div className="flex space-x-1">
                 {intervals.map((int) => (
                   <button
                     key={int}
-                    className={`py-2 px-3 text-xs rounded-[10px] border hover:border-white hover:bg-black hover:bg-opacity-10 transition-all ${interval === int ? `text-white bg-black ${chartColors.buttonActive}` : `${chartColors.secondaryText}`} hover:text-white`}
+                    className={`py-2 px-3 text-xs rounded-[10px] border hover:border-white hover:bg-black hover:bg-opacity-10 transition-all ${
+                      interval === int
+                        ? `text-white bg-black ${chartColors.buttonActive}`
+                        : `${chartColors.secondaryText}`
+                    } hover:text-white`}
                     style={{ borderColor: borderColor }}
                     onClick={() => setInterval(int)}
                   >
@@ -357,8 +414,12 @@ const CryptoChart: React.FC = () => {
             </div>
             <div className="flex items-center space-x-3">
               <div className="flex items-center gap-2">
-                <div className={`h-3 w-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}></div>
-                <span>{isConnected ? "Connected" : "Disconnected"}</span>
+                <div
+                  className={`h-3 w-3 rounded-full ${
+                    isConnected ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                ></div>
+                <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
               </div>
             </div>
           </div>
@@ -371,21 +432,25 @@ const CryptoChart: React.FC = () => {
             <div className="flex items-center text-sm px-3 py-1">
               {(() => {
                 const changePercent = isHovering
-                  ? ((hoveredCandle?.close ?? 0) - (hoveredCandle?.open ?? 0)) /
-                  (hoveredCandle?.open ?? 1) *
-                  100
+                  ? (((hoveredCandle?.close ?? 0) -
+                      (hoveredCandle?.open ?? 0)) /
+                      (hoveredCandle?.open ?? 1)) *
+                    100
                   : priceData.changePercent ?? 0;
 
-                const changeColor = changePercent >= 0 ? "text-green-500" : "text-red-500";
+                const changeColor =
+                  changePercent >= 0 ? 'text-green-500' : 'text-red-500';
 
                 return (
                   <>
                     <div className="flex items-center gap-2 mr-[1rem]">
                       <span>
-                        {isHovering ? formatPrice(hoveredCandle?.close ?? 0) : formatPrice(priceData.current)}
+                        {isHovering
+                          ? formatPrice(hoveredCandle?.close ?? 0)
+                          : formatPrice(priceData.current)}
                       </span>
                       <span className={changeColor}>
-                        {changePercent >= 0 ? "+" : ""}
+                        {changePercent >= 0 ? '+' : ''}
                         {formatPrice(changePercent)}%
                       </span>
                     </div>
@@ -393,25 +458,33 @@ const CryptoChart: React.FC = () => {
                       <span>
                         O
                         <span className={changeColor}>
-                          {isHovering ? formatPrice(hoveredCandle?.open ?? 0) : formatPrice(priceData.open)}
+                          {isHovering
+                            ? formatPrice(hoveredCandle?.open ?? 0)
+                            : formatPrice(priceData.open)}
                         </span>
                       </span>
                       <span>
                         H
                         <span className={changeColor}>
-                          {isHovering ? formatPrice(hoveredCandle?.high ?? 0) : formatPrice(priceData.high)}
+                          {isHovering
+                            ? formatPrice(hoveredCandle?.high ?? 0)
+                            : formatPrice(priceData.high)}
                         </span>
                       </span>
                       <span>
                         L
                         <span className={changeColor}>
-                          {isHovering ? formatPrice(hoveredCandle?.low ?? 0) : formatPrice(priceData.low)}
+                          {isHovering
+                            ? formatPrice(hoveredCandle?.low ?? 0)
+                            : formatPrice(priceData.low)}
                         </span>
                       </span>
                       <span>
                         C
                         <span className={changeColor}>
-                          {isHovering ? formatPrice(hoveredCandle?.close ?? 0) : formatPrice(priceData.current)}
+                          {isHovering
+                            ? formatPrice(hoveredCandle?.close ?? 0)
+                            : formatPrice(priceData.current)}
                         </span>
                       </span>
                     </div>
@@ -419,12 +492,14 @@ const CryptoChart: React.FC = () => {
                 );
               })()}
             </div>
-
           </div>
-
         </div>
 
-        <div ref={chartContainerRef} id="candleChart" className="w-full min-h-[500px]" />
+        <div
+          ref={chartContainerRef}
+          id="candleChart"
+          className="w-full min-h-[500px]"
+        />
 
         {/* <BinanceDataViewer /> */}
       </div>

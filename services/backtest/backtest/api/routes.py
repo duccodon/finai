@@ -4,6 +4,7 @@ from backtest.schemas import RunRequest, CapitalCfg, BacktestCfg, StrategyCfg
 from backtest.data.loader_csv import fetch_klines_all
 from backtest.core.strategies.ma_cross import prepare_ma_cross
 from backtest.core.strategies.rsi_threshold import prepare_rsi_threshold
+from backtest.core.strategies.macd import prepare_macd
 from backtest.core.engine import backtest_engine, clean_backtest_result
 from backtest.core.metrics import max_drawdown_pct, profit_factor, buy_hold_return_pct, win_rate_pct
 from ..db import get_db
@@ -20,9 +21,20 @@ STRATEGY_MAP = {
     "RSI_THRESHOLD": lambda df, params: prepare_rsi_threshold(df, **params),
     "MACD": lambda df, params: prepare_macd(df, **params),
 }
+
+def _get_user_id():
+    uid = request.headers.get("X-User-Id")
+    if not uid:
+        # 401 thay vì 400 cho thiếu xác thực
+        return None
+    return uid
+    
 @bp.route("/run", methods=["POST"])
 def run_backtest():
     p = request.get_json(force=True)
+    user_id = _get_user_id()
+    if not user_id:
+        return jsonify({"error": "unauthorized"}), 401
     # ---- parse input
     runreq = RunRequest(
         symbol=p["symbol"],
@@ -81,6 +93,7 @@ def run_backtest():
     run_id = f"bt_{run_oid}"  # string tiện cho FE
     db = get_db()
     db["backtest_runs"].insert_one({
+        "user_id": user_id,
         "_id": run_oid,
         "run_id": run_id,
         "created_at": datetime.utcnow(),
@@ -90,12 +103,12 @@ def run_backtest():
 
     if trades:
         db["backtest_trades"].insert_many(
-            [{ "run_id": run_id, **t } for t in trades]
+            [{ "run_id": run_id, "user_id": user_id, **t } for t in trades]
         )
 
     if equity:
         db["backtest_equity"].insert_many(
-            [{ "run_id": run_id, **pt } for pt in equity]
+            [{ "run_id": run_id, "user_id": user_id, **pt } for pt in equity]
         )
 
     # ---------- TRẢ VỀ JSON ----------
@@ -111,7 +124,11 @@ def run_backtest():
 @bp.get("/")
 def list_backtests():
     db = get_db()
-    docs = db["backtest_runs"].find({}, {"summary": 1, "run_id": 1, "created_at": 1}).sort("created_at", -1)
+    user_id = _get_user_id()
+    if not user_id:
+        return jsonify({"error": "unauthorized"}), 401
+
+    docs = db["backtest_runs"].find({"user_id": user_id}, {"summary": 1, "run_id": 1, "created_at": 1}).sort("created_at", -1)
     return jsonify([
         {
             "run_id": d["run_id"],
@@ -123,25 +140,31 @@ def list_backtests():
 @bp.get("/<run_id>/detail")
 def get_run_detail(run_id):
     db = get_db()
-    run = db["backtest_runs"].find_one({"run_id": run_id}, {"_id": 0})
+    user_id = _get_user_id()
+    run = db["backtest_runs"].find_one({"run_id": run_id, "user_id": user_id}, {"_id": 0})
     if not run:
         return jsonify({"error": "not_found"}), 404
     return jsonify(run)  # { run_id, created_at, summary, params, ...}
 
 @bp.get("/<run_id>/trades")
 def get_trades(run_id):
+    user_id = _get_user_id()
+    if not user_id:
+        return jsonify({"error": "unauthorized"}), 401
     db = get_db()
     page = int(request.args.get("page", 1))
     size = int(request.args.get("size", 10))
     skip = (page - 1) * size
 
+    q = {"run_id": run_id, "user_id": user_id}
+
     cursor = (db["backtest_trades"]
-              .find({"run_id": run_id}, {"_id": 0})
+              .find(q, {"_id": 0})
               .sort("seq", 1)
               .skip(skip)
               .limit(size))
     items = list(cursor)
-    total = db["backtest_trades"].count_documents({"run_id": run_id})
+    total = db["backtest_trades"].count_documents(q)
 
     return jsonify({
         "items": items,
@@ -154,12 +177,15 @@ def get_trades(run_id):
 
 @bp.get("/<run_id>/equity")
 def get_equity(run_id):
-    """Full curve; optional range for tương lai."""
+    user_id = _get_user_id()
+    if not user_id:
+        return jsonify({"error": "unauthorized"}), 401
+
     db = get_db()
     # optional range:
     frm = request.args.get("from")  # ISO
     to  = request.args.get("to")    # ISO
-    q = {"run_id": run_id}
+    q = {"run_id": run_id, "user_id": user_id}
     if frm or to:
         rng = {}
         if frm: rng["$gte"] = frm
@@ -167,6 +193,10 @@ def get_equity(run_id):
         q["t"] = rng
 
     pts = list(db["backtest_equity"]
-               .find(q, {"_id": 0, "run_id": 0})
+               .find(q, {"_id": 0, "run_id": 0, "user_id": 0})
                .sort("t", 1))
     return jsonify(pts)
+
+@bp.route("/debug", methods=["GET", "POST"])
+def debug():
+    return jsonify({"msg": "debug ok"})

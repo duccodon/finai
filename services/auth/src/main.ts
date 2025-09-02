@@ -18,16 +18,16 @@ async function bootstrap() {
     }),
   );
 
-  // Allow all origins
-  app.enableCors({
-    origin: true,
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+  // // Allow all origins
+  // app.enableCors({
+  //   origin: true,
+  //   credentials: true,
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  //   allowedHeaders: ['Content-Type', 'Authorization'],
+  // });
 
   console.log('PORT >>>', process.env.PORT);
   app.use(cookieParser());
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();
