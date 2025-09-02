@@ -28,14 +28,14 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { createBacktest } from '@/services/backtestService';
 import { useBacktestList } from '@/hooks/useBacktests';
-
+import { StrategyParams } from '@/pages/Backtest/StrategyParams';
 // formatter ngày giờ
 const fmt = new Intl.DateTimeFormat('vi-VN', {
   dateStyle: 'medium',
   timeStyle: 'short',
 });
 
-type StrategyType = 'MA_CROSS' | 'RSI_THRESHOLD';
+type StrategyType = 'MA_CROSS' | 'RSI_THRESHOLD' | 'MACD';
 
 export default function BacktestHome() {
   const navigate = useNavigate();
@@ -85,6 +85,10 @@ export default function BacktestHome() {
       | {
           type: 'RSI_THRESHOLD';
           params: { lower: number; upper: number; period: number };
+        }
+      | {
+          type: 'MACD';
+          params: { fast: number; slow: number; signal: number };
         };
 
     if (strategyType === 'MA_CROSS') {
@@ -108,7 +112,7 @@ export default function BacktestHome() {
         type: 'MA_CROSS',
         params: { short_window, long_window },
       };
-    } else {
+    } else if (strategyType === 'RSI_THRESHOLD') {
       const lower = Number(fd.get('rsi_lower') || 30);
       const upper = Number(fd.get('rsi_upper') || 70);
       const period = Number(fd.get('rsi_period') || 14);
@@ -135,6 +139,14 @@ export default function BacktestHome() {
         type: 'RSI_THRESHOLD',
         params: { lower, upper, period },
       };
+    } else if (strategyType === 'MACD') {
+      strategy = {
+        type: 'MACD',
+        params: { fast: 12, slow: 26, signal: 9 },
+      };
+    } else {
+      alert('Chiến lược không hợp lệ.');
+      return;
     }
 
     // Body theo schema
@@ -331,75 +343,13 @@ export default function BacktestHome() {
                           <SelectItem value="RSI_THRESHOLD">
                             RSI_THRESHOLD
                           </SelectItem>
+                          <SelectItem value="MACD">MACD</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     {/* Overlay params theo strategy */}
-                    {strategyType === 'MA_CROSS' ? (
-                      <div className="grid gap-3 md:grid-cols-3 mt-3">
-                        <div className="grid gap-1">
-                          <Label htmlFor="short_window">Short window</Label>
-                          <Input
-                            id="short_window"
-                            name="short_window"
-                            type="number"
-                            defaultValue={50}
-                          />
-                        </div>
-                        <div className="grid gap-1">
-                          <Label htmlFor="long_window">Long window</Label>
-                          <Input
-                            id="long_window"
-                            name="long_window"
-                            type="number"
-                            defaultValue={200}
-                          />
-                        </div>
-                        <div className="grid gap-1 opacity-0 pointer-events-none">
-                          {/* chừa chỗ cho layout */}
-                          <Input tabIndex={-1} aria-hidden />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="grid gap-3 md:grid-cols-3 mt-3">
-                        <div className="grid gap-1">
-                          <Label htmlFor="rsi_lower">RSI Lower (0-100)</Label>
-                          <Input
-                            id="rsi_lower"
-                            name="rsi_lower"
-                            type="number"
-                            step="1"
-                            min={0}
-                            max={100}
-                            defaultValue={30}
-                          />
-                        </div>
-                        <div className="grid gap-1">
-                          <Label htmlFor="rsi_upper">RSI Upper (0-100)</Label>
-                          <Input
-                            id="rsi_upper"
-                            name="rsi_upper"
-                            type="number"
-                            step="1"
-                            min={0}
-                            max={100}
-                            defaultValue={70}
-                          />
-                        </div>
-                        <div className="grid gap-1">
-                          <Label htmlFor="rsi_period">RSI Period</Label>
-                          <Input
-                            id="rsi_period"
-                            name="rsi_period"
-                            type="number"
-                            step="1"
-                            min={1}
-                            defaultValue={14}
-                          />
-                        </div>
-                      </div>
-                    )}
+                    <StrategyParams strategyType={strategyType} />
 
                     {/* SL / TP */}
                     <div className="grid gap-3 md:grid-cols-2 mt-4">
@@ -443,10 +393,11 @@ export default function BacktestHome() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>Strategy</TableHead>
                 <TableHead>Symbol</TableHead>
                 <TableHead>Timeframe</TableHead>
                 <TableHead>Created At</TableHead>
+                <TableHead>Duration</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -454,10 +405,14 @@ export default function BacktestHome() {
               {items.map((row, index) => (
                 <TableRow key={row.run_id}>
                   <TableCell>{index}</TableCell>
-                  <TableCell className="font-medium">{row.run_id}</TableCell>
+                  <TableCell className="font-medium">{row.strategy}</TableCell>
                   <TableCell>{row.symbol}</TableCell>
                   <TableCell>{row.timeframe}</TableCell>
                   <TableCell>{fmt.format(new Date(row.created_at))}</TableCell>
+                  <TableCell>
+                    {fmt.format(new Date(row.start))} -{'> '}
+                    {fmt.format(new Date(row.end))}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="outline"

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 # ---- Input ----
 @dataclass
 class StrategyCfg:
-    type: Literal["MA_CROSS", "RSI_THRESHOLD", "BREAKOUT"]
+    type: Literal["MA_CROSS", "RSI_THRESHOLD", "MACD"]
     params: Dict[str, Any]
 
 @dataclass
@@ -51,6 +51,7 @@ class Trade:
 
 @dataclass
 class Summary:
+    strategy: str
     symbol: str
     timeframe: str
     start: str

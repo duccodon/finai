@@ -20,6 +20,7 @@ STRATEGY_MAP = {
     ),
     "RSI_THRESHOLD": lambda df, params: prepare_rsi_threshold(df, **params),
     "MACD": lambda df, params: prepare_macd(df, **params),
+
 }
 
 def _get_user_id():
@@ -49,8 +50,6 @@ def run_backtest():
 
     #df = load_csv(runreq.symbol, runreq.timeframe, runreq.start_date, runreq.end_date)
     df = fetch_klines_all(runreq.symbol, runreq.timeframe, runreq.start_date, runreq.end_date)
-    print("Số nến:", len(df))
-    # df: t, open, high, low, close, volume
 
     # ---- prepare signals
     strategy_type = runreq.strategy.type
@@ -75,6 +74,7 @@ def run_backtest():
     final_eq = result["final_equity"]
 
     summary = {
+        "strategy": runreq.strategy.type,
         "symbol": runreq.symbol,
         "timeframe": runreq.timeframe,
         "start": df.iloc[0]["t"] if not df.empty else runreq.start_date,
@@ -101,6 +101,7 @@ def run_backtest():
         "summary": summary,  # lưu summary đã tính
     })
 
+    print('trades:', trades)
     if trades:
         db["backtest_trades"].insert_many(
             [{ "run_id": run_id, "user_id": user_id, **t } for t in trades]

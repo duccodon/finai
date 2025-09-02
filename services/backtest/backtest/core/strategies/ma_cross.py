@@ -12,3 +12,6 @@ def prepare_ma_cross(df: pd.DataFrame, short_window: int, long_window: int) -> p
     df.loc[(~prev) & (curr), "signal"] = 1    # cross up
     df.loc[(prev) & (~curr), "signal"] = -1   # cross down
     return df.dropna().reset_index(drop=True)
+
+
+    
