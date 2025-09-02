@@ -11,20 +11,8 @@ import {
 import axios from 'axios';
 import { type UTCTimestamp } from 'lightweight-charts';
 
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import SearchSymbolDialog from './searchSymbolDialog';
 
-//import BinanceDataViewer from "./searchCoin";
 
 const intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 
@@ -45,7 +33,7 @@ const chartColors = {
 const borderColor = 'rgba(132,130,130,0.37)';
 
 const CryptoChart: React.FC = () => {
-  const [symbol, setSymbol] = useState('LINKUSDT');
+  const [symbol, setSymbol] = useState('LINKBTC');
   const [interval, setInterval] = useState('1m');
   const [isConnected, setIsConnected] = useState(false);
   const [priceData, setPriceData] = useState({
@@ -57,10 +45,7 @@ const CryptoChart: React.FC = () => {
     changePercent: null as number | null,
   });
   const [searchSymbolDialogOpen, setSearchSymbolDialogOpen] = useState(false);
-  const [symbolInput, setSymbolInput] = useState('BTCUSDT');
-  const [hoveredCandle, setHoveredCandle] = useState<CandlestickData | null>(
-    null
-  );
+  const [hoveredCandle, setHoveredCandle] = useState<CandlestickData | null>(null);
   const [isHovering, setIsHovering] = useState(false);
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -144,94 +129,58 @@ const CryptoChart: React.FC = () => {
     console.log('Chart initialized with container:', chartContainerRef.current);
   };
 
-  const fetchHistoricalData = async () => {
-    try {
-      const response = await axios.get(
-        'https://api.binance.com/api/v3/klines',
-        {
-          params: { symbol: symbol.toUpperCase(), interval, limit: 1000 },
-        }
-      );
+  // const connectWebSocket = () => {
+  //   if (wsRef.current) {
+  //     wsRef.current.close();
+  //     setIsConnected(false);
+  //   }
 
-      const formattedData = response.data
-        .map(formatKlineData)
-        .filter((item): item is CandlestickData => item !== null);
+  //   const ws = new WebSocket(
+  //     `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`
+  //   );
 
-      if (formattedData.length > 0) {
-        candleSeriesRef.current?.setData(formattedData);
-        const lastCandle = formattedData[formattedData.length - 1];
-        setPriceData({
-          current: lastCandle.close,
-          high: lastCandle.high,
-          low: lastCandle.low,
-          open: lastCandle.open,
-          change: lastCandle.close - lastCandle.open,
-          changePercent:
-            ((lastCandle.close - lastCandle.open) / lastCandle.open) * 100,
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching historical data:', error);
-    }
-  };
+  //   ws.onopen = () => setIsConnected(true);
+  //   ws.onclose = () => setIsConnected(false);
+  //   ws.onerror = console.error;
 
-  const connectWebSocket = () => {
-    if (wsRef.current) {
-      wsRef.current.close();
-      setIsConnected(false);
-    }
+  //   ws.onmessage = (event) => {
+  //     try {
+  //       const message = JSON.parse(event.data);
+  //       if (message.k) {
+  //         const kline = message.k;
+  //         const newCandle = formatKlineData([
+  //           kline.t,
+  //           kline.o,
+  //           kline.h,
+  //           kline.l,
+  //           kline.c,
+  //         ]);
+  //         if (newCandle) {
+  //           candleSeriesRef.current?.update(newCandle);
+  //           setPriceData((prev) => ({
+  //             current: parseFloat(kline.c),
+  //             high: Math.max(parseFloat(kline.h), prev.high || 0),
+  //             low: Math.min(parseFloat(kline.l), prev.low || Infinity),
+  //             open: parseFloat(kline.o),
+  //             change: parseFloat(kline.c) - parseFloat(kline.o),
+  //             changePercent:
+  //               ((parseFloat(kline.c) - parseFloat(kline.o)) / parseFloat(kline.o)) * 100,
+  //           }));
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error processing WebSocket message:', error);
+  //     }
+  //   };
 
-    const ws = new WebSocket(
-      `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`
-    );
-
-    ws.onopen = () => setIsConnected(true);
-    ws.onclose = () => setIsConnected(false);
-    ws.onerror = console.error;
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        if (message.k) {
-          const kline = message.k;
-          const newCandle = formatKlineData([
-            kline.t,
-            kline.o,
-            kline.h,
-            kline.l,
-            kline.c,
-          ]);
-          if (newCandle) {
-            candleSeriesRef.current?.update(newCandle);
-            setPriceData((prev) => ({
-              current: parseFloat(kline.c),
-              high: Math.max(parseFloat(kline.h), prev.high || 0),
-              low: Math.min(parseFloat(kline.l), prev.low || Infinity),
-              open: parseFloat(kline.o),
-              change: parseFloat(kline.c) - parseFloat(kline.o),
-              changePercent:
-                ((parseFloat(kline.c) - parseFloat(kline.o)) /
-                  parseFloat(kline.o)) *
-                100,
-            }));
-          }
-        }
-      } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-      }
-    };
-
-    wsRef.current = ws;
-  };
+  //   wsRef.current = ws;
+  // };
 
   const formatPrice = (price: number | null) => price?.toFixed(2) || '-';
 
   useEffect(() => {
-    // Initialize chart on mount
     initChart();
-
     return () => {
-      // Cleanup on unmount
       wsRef.current?.close();
       chartRef.current?.remove();
       chartRef.current = null;
@@ -240,6 +189,33 @@ const CryptoChart: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const fetchHistoricalData = async () => {
+      try {
+        const response = await axios.get('https://api.binance.com/api/v3/klines', {
+          params: { symbol: symbol.toUpperCase(), interval, limit: 1000 },
+        });
+
+        const formattedData = response.data
+          .map(formatKlineData)
+          .filter((item): item is CandlestickData => item !== null);
+
+        if (formattedData.length > 0) {
+          candleSeriesRef.current?.setData(formattedData);
+          const lastCandle = formattedData[formattedData.length - 1];
+          setPriceData({
+            current: lastCandle.close,
+            high: lastCandle.high,
+            low: lastCandle.low,
+            open: lastCandle.open,
+            change: lastCandle.close - lastCandle.open,
+            changePercent: ((lastCandle.close - lastCandle.open) / lastCandle.open) * 100,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching historical data:', error);
+      }
+    };
+
     if (!chartRef.current || !candleSeriesRef.current) return;
 
     let active = true;
@@ -249,13 +225,11 @@ const CryptoChart: React.FC = () => {
       try {
         await fetchHistoricalData();
 
-        // Close existing connection
         if (wsRef.current) {
           wsRef.current.close();
           setIsConnected(false);
         }
 
-        // Create new connection
         ws = new WebSocket(
           `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`
         );
@@ -286,9 +260,7 @@ const CryptoChart: React.FC = () => {
                   open: parseFloat(kline.o),
                   change: parseFloat(kline.c) - parseFloat(kline.o),
                   changePercent:
-                    ((parseFloat(kline.c) - parseFloat(kline.o)) /
-                      parseFloat(kline.o)) *
-                    100,
+                    ((parseFloat(kline.c) - parseFloat(kline.o)) / parseFloat(kline.o)) * 100,
                 }));
               }
             }
@@ -322,56 +294,14 @@ const CryptoChart: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSymbolSelect = () => {
-    if (symbolInput.trim()) {
-      setSymbol(symbolInput.trim().toUpperCase());
-      setSearchSymbolDialogOpen(false);
-    }
-  };
-
   return (
     <>
-      <Dialog
+      <SearchSymbolDialog
         open={searchSymbolDialogOpen}
         onOpenChange={setSearchSymbolDialogOpen}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Change Symbol</DialogTitle>
-            <DialogDescription>
-              Enter a new cryptocurrency trading pair
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="symbol" className="sr-only">
-                Symbol
-              </Label>
-              <Input
-                id="symbol"
-                value={symbol}
-                onChange={(e) => setSymbolInput(e.target.value)}
-                placeholder="Enter symbol (e.g., BTCUSDT)"
-                onKeyDown={(e) => e.key === 'Enter' && handleSymbolSelect()}
-              />
-            </div>
-          </div>
-          <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              type="button"
-              onClick={handleSymbolSelect}
-              disabled={!symbol.trim()}
-            >
-              Change Symbol
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onSymbolSelect={setSymbol}
+        borderColor={borderColor}
+      />
 
       <div
         className={`p-4 relative border rounded-[10px]`}
@@ -399,11 +329,10 @@ const CryptoChart: React.FC = () => {
                 {intervals.map((int) => (
                   <button
                     key={int}
-                    className={`py-2 px-3 text-xs rounded-[10px] border hover:border-white hover:bg-black hover:bg-opacity-10 transition-all ${
-                      interval === int
+                    className={`py-2 px-3 text-xs rounded-[10px] border hover:border-white hover:bg-black hover:bg-opacity-10 transition-all ${interval === int
                         ? `text-white bg-black ${chartColors.buttonActive}`
                         : `${chartColors.secondaryText}`
-                    } hover:text-white`}
+                      } hover:text-white`}
                     style={{ borderColor: borderColor }}
                     onClick={() => setInterval(int)}
                   >
@@ -415,9 +344,7 @@ const CryptoChart: React.FC = () => {
             <div className="flex items-center space-x-3">
               <div className="flex items-center gap-2">
                 <div
-                  className={`h-3 w-3 rounded-full ${
-                    isConnected ? 'bg-green-500' : 'bg-red-500'
-                  }`}
+                  className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
                 ></div>
                 <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
               </div>
@@ -425,7 +352,7 @@ const CryptoChart: React.FC = () => {
           </div>
 
           {/* Second row */}
-          <div className="flex items-center justify-between rounded-[10px] px-4 py-1 w-[35%]">
+          <div className="flex items-center justify-between rounded-[10px] px-4 py-1 w-[40%]">
             <div className="text-xs">
               {symbol} • {interval}
             </div>
@@ -433,9 +360,9 @@ const CryptoChart: React.FC = () => {
               {(() => {
                 const changePercent = isHovering
                   ? (((hoveredCandle?.close ?? 0) -
-                      (hoveredCandle?.open ?? 0)) /
-                      (hoveredCandle?.open ?? 1)) *
-                    100
+                    (hoveredCandle?.open ?? 0)) /
+                    (hoveredCandle?.open ?? 1)) *
+                  100
                   : priceData.changePercent ?? 0;
 
                 const changeColor =

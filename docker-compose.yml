@@ -67,6 +67,7 @@ services:
     build:
       context: ./services/Backtest
       dockerfile: Dockerfile
+    image: finai-backtest
     container_name: backtest-dev
     ports:
       - '5000:5000'
