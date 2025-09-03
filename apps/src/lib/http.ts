@@ -6,14 +6,16 @@ import axios, {
 
 // Instance chính cho toàn app
 const http = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  // baseURL: 'http://localhost:8080/api',
+  baseURL: '/api',
   timeout: 5000,
   withCredentials: true,
 });
 // Instance riêng cho refresh (không interceptor để tránh vòng lặp)
 // Nếu refresh qua domain/port khác với FE, bật withCredentials ở đây.
 export const refreshHttp = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  // baseURL: 'http://localhost:8080/api',
+  baseURL: '/api',
   timeout: 5000,
   withCredentials: true,
 });
