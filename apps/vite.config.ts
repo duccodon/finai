@@ -28,6 +28,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/api/predict': {
+        target: 'http://localhost:9000',
+        changeOrigin: true,
+        secure: false,
+      }
     },
   },
 });
