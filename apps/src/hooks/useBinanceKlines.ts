@@ -31,6 +31,78 @@ export const formatKlineData = (k: any[]) => {
   };
 };
 
+const INTERVAL_MS: Record<string, number> = {
+  '1m': 60_000,
+  '5m': 300_000,
+  '15m': 900_000,
+  '30m': 1_800_000,
+  '1h': 3_600_000,
+  '4h': 14_400_000,
+  '1d': 86_400_000,
+  '1w': 604_800_000,
+};
+
+type KlineRow = [number, string, string, string, string, ...rest: any[]]; // [openTime, open, high, low, close, ...]
+
+async function fetchKlinesPage(
+  symbol: string,
+  interval: string,
+  limit: number,
+  endTime?: number
+): Promise<KlineRow[]> {
+  const params: any = { symbol, interval, limit };
+  if (endTime) params.endTime = endTime; // lùi về trước endTime này (ms)
+  const { data } = await axios.get('https://api.binance.com/api/v3/klines', {
+    params,
+  });
+  return data as KlineRow[];
+}
+
+/** Lấy gần nhất ~targetCount nến bằng cách lùi theo endTime (tối đa 1000/req). */
+export async function fetchKlinesBackfill(
+  symbol: string,
+  interval: string,
+  targetCount = 5000,
+  perPage = 1000,
+  pauseMs = 120
+): Promise<KlineRow[]> {
+  const out: KlineRow[] = [];
+  let endTime: number | undefined = undefined; // undefined = latest
+  const seen = new Set<number>();
+
+  while (out.length < targetCount) {
+    const page = await fetchKlinesPage(symbol, interval, perPage, endTime);
+    if (!page.length) break;
+
+    // Thêm vào out nếu chưa thấy openTime
+    for (const row of page) {
+      const openTime = row[0];
+      if (!seen.has(openTime)) {
+        seen.add(openTime);
+        out.push(row);
+      }
+    }
+
+    // Lùi endTime về openTime của cây đầu tiên trong page - 1ms
+    const firstOpenTime = page[0][0];
+    const step = INTERVAL_MS[interval] ?? 60_000;
+    endTime = firstOpenTime - 1; // an toàn lùi 1ms
+
+    // Hết về quá xa thì dừng (phòng ngừa)
+    if (page.length < perPage) break;
+
+    // Nghỉ một nhịp tránh spam
+    if (pauseMs) await new Promise((r) => setTimeout(r, pauseMs));
+  }
+
+  // Giữ lại đúng targetCount nến mới nhất
+  out.sort((a, b) => a[0] - b[0]);
+  if (out.length > targetCount) {
+    return out.slice(out.length - targetCount);
+  }
+  return out;
+}
+
 export const useBinanceKlines = (symbol: string, interval: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [priceData, setPriceData] = useState<PriceData>({
@@ -55,25 +127,36 @@ export const useBinanceKlines = (symbol: string, interval: string) => {
     let openTimer: number | null = null;
 
     const fetchHistory = async () => {
-      const res = await axios.get('https://api.binance.com/api/v3/klines', {
-        params: { symbol: symbol.toUpperCase(), interval, limit: 1000 },
+      const symbolU = symbol.toUpperCase();
+      // lấy ~5000 nến
+      const rows = await fetchKlinesBackfill(
+        symbolU,
+        interval,
+        3000,
+        1000,
+        120
+      );
+
+      // convert về CandlestickData và set vào series
+      const bulk = rows.map((r) => ({
+        time: Math.floor(r[0] / 1000) as any,
+        open: parseFloat(r[1]),
+        high: parseFloat(r[2]),
+        low: parseFloat(r[3]),
+        close: parseFloat(r[4]),
+      }));
+      setSeriesDataRef.current?.('set', null, bulk);
+
+      // cập nhật priceData từ nến cuối
+      const last = bulk[bulk.length - 1];
+      setPriceData({
+        current: last.close,
+        high: last.high,
+        low: last.low,
+        open: last.open,
+        change: last.close - last.open,
+        changePercent: ((last.close - last.open) / last.open) * 100,
       });
-      const bulk = res.data
-        .map((row: any[]) => [row[0], row[1], row[2], row[3], row[4]])
-        .map(formatKlineData)
-        .filter(Boolean);
-      if (bulk?.length && setSeriesDataRef.current) {
-        setSeriesDataRef.current('set', null, bulk);
-        const last = bulk[bulk.length - 1];
-        setPriceData({
-          current: last.close,
-          high: last.high,
-          low: last.low,
-          open: last.open,
-          change: last.close - last.open,
-          changePercent: ((last.close - last.open) / last.open) * 100,
-        });
-      }
     };
 
     const connect = async () => {

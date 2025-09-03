@@ -50,7 +50,7 @@ export const ChartToolbar: React.FC<Props> = ({
   macdOn,
 }) => {
   return (
-    <div className="flex items-center justify-between px-3 py-2 mb-3">
+    <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-3">
         <div
           className={`px-3 py-1 rounded-[10px] w-40 cursor-pointer border transition-all flex items-center justify-between`}
