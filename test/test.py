@@ -45,7 +45,6 @@ def load_crypto_map():
 
 # RSS feed URLs (general feeds unless specified)
 rss_urls = {
-    "CNBC": "https://www.cnbc.com/id/10000664/device/rss/rss.html",
     "CoinDesk": "https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml",
     "CoinTelegraph": "https://cointelegraph.com/rss"
 }
@@ -204,7 +203,7 @@ def collect_crypto_news(symbols, crypto_map):
         yahoo_entries = fetch_yahoo_rss(base_symbol, crypto_map)
         all_entries.extend(yahoo_entries)
 
-        # Fetch from Reuters via Google News
+        # # Fetch from Reuters via Google News
         print(f"Fetching from Reuters (via Google News) for {name}...")
         reuters_entries = fetch_reuters_google_news(base_symbol, crypto_map)
         all_entries.extend(reuters_entries)
@@ -212,9 +211,9 @@ def collect_crypto_news(symbols, crypto_map):
         # Extract full clean content for each entry using AI
         for entry in all_entries:
             print(f"Extracting full content from {entry['link']}...")
-            content = extract_article_content(entry['link'])
-            entry["full_content"] = content.get("content", "")  # Add clean content
-            entry["extracted_title"] = content.get("title", entry["title"])  # Use AI-extracted title if better
+            #content = extract_article_content(entry['link'])
+            #entry["full_content"] = content.get("content", "")  # Add clean content
+            #entry["extracted_title"] = content.get("title", entry["title"])  # Use AI-extracted title if better
 
         results[symbol] = all_entries
         print(f"Found {len(all_entries)} articles for {name} (from {symbol})")
@@ -230,7 +229,7 @@ def main():
 
     # Example: List of trading pairs
     # symbols = ["BTCUSDT", "LINKBTC", "ETHEUR", "TUSDUSDT"]
-    symbols = ["LINKBTC", "ETHEUR"]
+    symbols = ["BTCUSDT"]
     news_entries = collect_crypto_news(symbols, crypto_map)
 
     # Display results (for UI integration)
@@ -244,7 +243,7 @@ def main():
             print(f"Link: {entry['link']}")
             print(f"Published: {entry['published']}")
             print(f"Summary: {entry['summary'][:200]}...")
-            print(f"Full Clean Content: {entry['full_content'][:500]}...")  # Truncate for display
+            #print(f"Full Clean Content: {entry['full_content'][:500]}...")  # Truncate for display
 
     # For near real-time updates, uncomment to run periodically
     # while True:
