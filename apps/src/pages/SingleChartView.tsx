@@ -8,10 +8,15 @@ import { useExchangeInfo } from '@/hooks/useExchangeInfo';
 import { MACrossOverlay } from '@/components/chart/indicators/MACrossOverlay';
 import { RSIPanel } from '@/components/chart/indicators/RSIPanel';
 import { MACDPanel } from '@/components/chart/indicators/MACDPanel';
+import { SwitchToMultiButton } from '@/components/chart/ViewSwitchButtons';
 const intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 const borderColor = 'rgba(132,130,130,0.37)';
 
-export const SingleChartView: React.FC = () => {
+type Props = {
+  onSwitchToMultiView: () => void;
+};
+
+export const SingleChartView: React.FC<Props> = ({ onSwitchToMultiView }) => {
   const [symbol, setSymbol] = useState('BTCUSDT');
   const [interval, setInterval] = useState('5m');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,6 +52,10 @@ export const SingleChartView: React.FC = () => {
           macdOn={macdOn}
           setMacdOn={setMacdOn}
         />
+        <div className="mb-3">
+          {' '}
+          <SwitchToMultiButton onClick={onSwitchToMultiView} />
+        </div>
       </div>
 
       {/* Main chart */}

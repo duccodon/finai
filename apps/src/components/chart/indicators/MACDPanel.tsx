@@ -190,7 +190,31 @@ export const MACDPanel: React.FC<Props> = ({
           MACD ({fast}, {slow}, {signal})
         </div>
       </div>
-      <div ref={containerRef} className="w-full min-h-[220px]" />
+
+      {/* Chart + legend */}
+      <div className="relative">
+        <div ref={containerRef} className="w-full min-h-[220px]" />
+
+        {/* Legend góc trái trên */}
+        <div className="absolute top-1 left-1 pointer-events-auto z-50">
+          <div className="flex items-center gap-3 rounded-md bg-white/85 backdrop-blur py-1 shadow text-[11px] leading-none">
+            <div className="flex items-center gap-1">
+              <span
+                className="inline-block h-2 w-4 rounded"
+                style={{ background: '#2962FF' }}
+              />
+              <span>MACD {fast}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span
+                className="inline-block h-2 w-4 rounded"
+                style={{ background: '#EF6C00' }}
+              />
+              <span>Signal {slow}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

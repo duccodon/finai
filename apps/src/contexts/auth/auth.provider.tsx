@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const res = await authService.refresh();
-
+        console.log('AuthProvider: refresh result', res);
         if (mounted && res.accessToken) {
           setAccessToken(res.accessToken);
           setUser(res.user ?? null);
