@@ -3,19 +3,60 @@ import React, { useState } from 'react';
 import SearchSymbolDialog from '@/components/chart/SearchSymbolDialog';
 import { MultiChartGrid } from '@/layouts/MultiChartGrid';
 import { useExchangeInfo } from '@/hooks/useExchangeInfo';
+import { SwitchToSingleButton } from '@/components/chart/ViewSwitchButtons';
+import IntervalConfigDialog from '@/components/chart/IntervalConfigDialog';
+import { Clock } from 'lucide-react';
 
-const defaultIntervals = ['1m', '15m', '1h', '4h'];
+const defaultIntervals = ['1m', '15m', '1h', '4h'] as const;
 const borderColor = 'rgba(132,130,130,0.37)';
 
-export const MultiChartView: React.FC = () => {
+type Props = {
+  onSwitchToSingleView: () => void;
+};
+
+export const MultiChartView: React.FC<Props> = ({ onSwitchToSingleView }) => {
   const [symbol, setSymbol] = useState('BTCUSDT');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [intervalConfigOpen, setIntervalConfigOpen] = useState(false);
+  const [intervals, setIntervals] = useState<string[]>([...defaultIntervals]);
 
   const meta = useExchangeInfo(symbol);
 
   return (
     <>
-      {/* Chỉ chọn symbol một lần, khóa cho 4 charts */}
+      {/* Top bar */}
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-3">
+          {/* Symbol picker trigger */}
+          <div
+            className="px-3 py-1 rounded-[10px] w-40 cursor-pointer border transition-all flex items-center justify-between hover:bg-gray-50"
+            style={{ borderColor }}
+            onClick={() => setDialogOpen(true)}
+          >
+            <img
+              src="/search.svg"
+              alt="Search"
+              className="w-4 h-4 opacity-70"
+            />
+            <div className="flex-1 text-center truncate ml-2">{symbol}</div>
+          </div>
+
+          {/* Interval config trigger */}
+          <div
+            className="px-3 py-1 rounded-[10px] cursor-pointer border transition-all flex items-center justify-between hover:bg-gray-50"
+            style={{ borderColor }}
+            onClick={() => setIntervalConfigOpen(true)}
+          >
+            <Clock className="w-4 h-4 opacity-70" />
+            <div className=" ml-2">Intervals Config</div>
+          </div>
+        </div>
+
+        {/* Switch to single view */}
+        <SwitchToSingleButton onClick={onSwitchToSingleView} />
+      </div>
+
+      {/* Dialogs */}
       <SearchSymbolDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -23,26 +64,22 @@ export const MultiChartView: React.FC = () => {
         borderColor={borderColor}
       />
 
-      <div className="flex items-center justify-between px-3 py-2 mb-3">
-        <div
-          className={`px-3 py-1 rounded-[10px] w-40 cursor-pointer border transition-all flex items-center justify-between`}
-          style={{ borderColor }}
-          onClick={() => setDialogOpen(true)}
-        >
-          <img src="/search.svg" alt="Search" className="w-4 h-4 opacity-70" />
-          <div className="flex-1 text-center truncate ml-2">{symbol}</div>
-        </div>
-        <div className="text-sm text-gray-500">
-          Multi-chart · 1 symbol / 4 intervals
-        </div>
-      </div>
+      <IntervalConfigDialog
+        open={intervalConfigOpen}
+        onOpenChange={setIntervalConfigOpen}
+        intervals={intervals}
+        onChangeIntervals={setIntervals}
+      />
 
+      {/* Grid */}
       <MultiChartGrid
         symbol={symbol}
-        intervals={defaultIntervals}
+        intervals={intervals} // <-- dùng intervals từ state (không phải default cứng)
         tickSize={meta?.tickSize ?? 0.01}
         borderColor={borderColor}
       />
     </>
   );
 };
+
+export default MultiChartView;

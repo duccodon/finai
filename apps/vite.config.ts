@@ -14,11 +14,16 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/backtest': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       },
       '/api/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/user': {
         target: 'http://localhost:4000',
         changeOrigin: true,
         secure: false,
