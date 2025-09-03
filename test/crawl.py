@@ -24,8 +24,10 @@ GRAPH_CONFIG = {
 #link = "https://www.coindesk.com/policy/2025/09/01/asia-morning-briefing-august-etf-flows-show-the-massive-scale-of-btc-to-eth-rotation"
 #link = "https://finance.yahoo.com/news/eric-trump-advised-japanese-bitcoin-010054830.html?.tsrc=rss"
 #link = "https://www.coinspeaker.com/metaplanet-stock-down-5-percent-20k-btc/?.tsrc=rss"
+#link = "https://news.google.com/rss/articles/CBMikgFBVV95cUxNVnZJYXFJVnE1dUxhUWYwd2R1YXdjUUhnaTczZnh2MWRkYi1tN21ocDhCQVlZdWdJV0RTLWkwUXBCX3FOZWhrR3RKRXJkbWpWRW1qYkNIVnlTQVRLb2t4bXh6OU1oTFhpcGpYbzJaZThZVHk3Wm45OVgyYkdrbE40TlBuYzNQU2ZEb1czSmI3Vlg2UQ?oc=5"
+link = "https://cointelegraph.com/news/crypto-market-buy-the-dip-calls-signals-downside-santiment"
 
-link = "https://news.google.com/rss/articles/CBMikgFBVV95cUxNVnZJYXFJVnE1dUxhUWYwd2R1YXdjUUhnaTczZnh2MWRkYi1tN21ocDhCQVlZdWdJV0RTLWkwUXBCX3FOZWhrR3RKRXJkbWpWRW1qYkNIVnlTQVRLb2t4bXh6OU1oTFhpcGpYbzJaZThZVHk3Wm45OVgyYkdrbE40TlBuYzNQU2ZEb1czSmI3Vlg2UQ?oc=5"
+#dont work
 #link = "https://www.thestreet.com/crypto/markets/eric-trump-linked-firm-becomes-6th-largest-bitcoin-holder?.tsrc=rss"
 
 def clean_html_for_article(raw_html: str) -> str:
@@ -47,6 +49,9 @@ def clean_html_for_article(raw_html: str) -> str:
     elif coinspeaker_content:
         print("Detected CoinSpeaker article format")
         paragraphs = [p.get_text(" ", strip=True) for p in coinspeaker_content.find_all("p")]
+    elif soup.select("div.text-module__text__0GDob"): #reuters specific
+        print("Detected Reuters article format")
+        paragraphs = [p.get_text(" ", strip=True) for p in soup.select("div.text-module__text__0GDob")]
     else:
         print("General article format")
         # Try Cointelegraph-specific selectors first
@@ -56,7 +61,7 @@ def clean_html_for_article(raw_html: str) -> str:
             or soup.find("div", class_="article-content") # Cointelegraph-specific
             or soup.select_one("div.m-detail--body") #thestreet specific
         )
-        print(article, "\n===================\n")
+        #print(article, "\n===================\n")
         if article:
             paragraphs = [p.get_text(" ", strip=True) for p in article.find_all("p")]
         else:
@@ -136,8 +141,11 @@ headers = {
 #print("Redirect URL:", get_redirected_url(link))
 try:
     scraper = cloudscraper.create_scraper()
+    if "news.google.com" in link:
+        print("Processing Google News link...")
+        link = get_redirected_url(link)
+        print("Redirected to:", link)
     response = scraper.get(link, headers=headers, allow_redirects=True)
-    print("Final URL:", response.url)
     if response.status_code == 200:
         html_content = response.text
     else:
