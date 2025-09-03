@@ -45,12 +45,15 @@ def run_predict():
     }
     """
     p = request.get_json(force=True)
+
     symbol   = p.get("symbol", "BTCUSDT").upper()
     interval = p.get("interval", "1h")
     seq_len  = int(p.get("seq_len", SEQ_LEN))
     force    = bool(p.get("force_train", False))
-    start    = p.get("start")  # ISO Z or None
-    end      = p.get("end")    # ISO Z or None
+    start    = p.get("2019-01-01T00:00:00Z")  # ISO Z or None
+    end      = p.get(None)    # ISO Z or None
+
+    
 
     # 1) Xác định chân trời dự đoán theo timeframe
     H = horizon_for_interval(interval)   # ví dụ: 15m→3, 1h→3, 1d→5

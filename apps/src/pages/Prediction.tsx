@@ -133,7 +133,7 @@ export default function Prediction() {
         body: JSON.stringify({
           symbol,
           interval: safeInterval,
-          seq_len: 60,
+          seq_len: 100,
           force_train: false,
         }),
       });
