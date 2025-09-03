@@ -18,7 +18,7 @@ export type RunRequest = {
     take_profit_pct?: number;
   };
   strategy: {
-    type: 'MA_CROSS' | 'RSI_THRESHOLD' | 'BREAKOUT';
+    type: 'MA_CROSS' | 'RSI_THRESHOLD' | 'MACD';
     params: Record<string, any>; // e.g. { short_window: number, long_window: number }
   };
 };
@@ -39,6 +39,7 @@ export type TradeDTO = {
 };
 
 export type SummaryDTO = {
+  strategy: string;
   symbol: string;
   timeframe: string;
   start: string;
@@ -64,8 +65,6 @@ export type BacktestDetailDTO = {
   summary: SummaryDTO;
   params: any; // có thể type-safe sau
 };
-
-// List item tuỳ backend của bạn trả gì (mock trước)
 
 export interface EquityPoint {
   t: string;
