@@ -261,21 +261,23 @@ export const CandleChart: React.FC<Props> = ({
       </div>
 
       {/* Overlay cho các chỉ báo */}
-      <div className="relative">
-        <div ref={containerRef} className="w-full min-h-[420px]" />
-        <div
-          ref={overlayRootRef}
-          className="absolute inset-0 pointer-events-none z-50"
-        />
-      </div>
-      {/* Trạng thái kết nối */}
-      <div className="mt-2 text-xs flex items-center gap-2">
-        <span
-          className={`h-2.5 w-2.5 rounded-full ${
-            isConnected ? 'bg-green-500' : 'bg-red-500'
-          }`}
-        />
-        <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+      <div className="mt-4 border rounded-[10px] bg-white overflow-hidden">
+        <div className="relative">
+          <div ref={containerRef} className="w-full min-h-[420px]" />
+          <div
+            ref={overlayRootRef}
+            className="absolute inset-0 pointer-events-none z-50"
+          />
+        </div>
+        {/* Trạng thái kết nối */}
+        <div className="m-2 text-xs flex items-center gap-2">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${
+              isConnected ? 'bg-green-500' : 'bg-red-500'
+            }`}
+          />
+          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+        </div>
       </div>
 
       {/* Provider bọc overlays */}
