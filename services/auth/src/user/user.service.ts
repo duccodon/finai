@@ -93,10 +93,8 @@ export class UserService {
     const exists = await this.prismaService.user.findUnique({ where: { id: userId } });
     if (!exists) throw new BadRequestException('User not found');
 
-    const data: Record<string, unknown> = {};
-
-    // simple string fields
-    const fields = [
+    // allowed simple fields (dob & password handled specially below)
+    const simpleFields = [
       'username',
       'email',
       'phone',
@@ -109,21 +107,53 @@ export class UserService {
       'state',
       'about',
       'avatarUrl',
-    ];
-    for (const f of fields) {
-      if (Object.prototype.hasOwnProperty.call(dto, f)) {
-        data[f] = dto[f];
+    ] as const;
+
+    const data: Record<string, unknown> = {};
+    const payload = dto;
+
+    // apply only keys that are PRESENT in the incoming DTO (undefined => not provided => keep old value)
+    for (const key of simpleFields) {
+      if (Object.prototype.hasOwnProperty.call(payload, key) !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const val = payload[key];
+        // allow null/empty string to overwrite existing value (if client explicitly sends it)
+        if (typeof val !== 'undefined') data[key] = val;
       }
     }
 
-    // handle dob
-    if (dto.dob && typeof dto.dob === 'string') {
-      data.dob = new Date(dto.dob);
+    // dob: if present in DTO, allow clearing (null/empty) or set Date
+    if (payload.dob !== undefined) {
+      const rawDob = payload['dob'];
+      if (rawDob === null || rawDob === '') {
+        data.dob = null;
+      } else if (typeof rawDob === 'string') {
+        data.dob = new Date(rawDob);
+      } else if ((rawDob as any) instanceof Date) {
+        data.dob = rawDob;
+      }
     }
 
-    // handle password (hash it)
-    if (dto.password && typeof dto.password === 'string') {
-      data.password = await bcrypt.hash(dto.password, 10);
+    // password: if present, validate & hash
+    if (payload.password !== undefined) {
+      const newPass = payload['password'];
+      if (!newPass || typeof newPass !== 'string' || newPass.length < 6) {
+        throw new BadRequestException('Password must be at least 6 characters');
+      }
+      data.password = await bcrypt.hash(newPass, 10);
+    }
+
+    // If email is being changed, ensure uniqueness
+    if (typeof data.email !== 'undefined' && data.email !== exists.email) {
+      const conflict = await this.prismaService.user.findUnique({
+        where: { email: data.email as string },
+      });
+      if (conflict) throw new BadRequestException('Email already in use');
+    }
+
+    // Nothing to update -> return current public user
+    if (Object.keys(data).length === 0) {
+      return this.toPublic(exists);
     }
 
     const updated = await this.prismaService.user.update({

@@ -11,21 +11,25 @@ import {
 import { Match } from './signup.dto';
 
 export class UpdateUserDto {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  username!: string;
+  username?: string;
 
+  @IsOptional()
   @IsEmail()
-  email!: string;
+  email?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(6, { message: 'Password must be at least $constraint1 characters' })
-  password!: string;
+  password?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(6, { message: 'Confirm Password must be at least $constraint1 characters' })
   @Match('password', { message: 'Confirm password must match password' })
-  confirmPassword!: string;
+  confirmPassword?: string;
 
   @IsOptional()
   @IsString()
