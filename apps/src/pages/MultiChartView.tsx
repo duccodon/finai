@@ -54,10 +54,10 @@ export const MultiChartView: React.FC<Props> = ({ onSwitchToSingleView }) => {
           </div>
         </div>
 
-        <div className='fixed right-4 top-4 z-20 flex items-center gap-2'>
+        <div className='right-4 top-4 z-20 flex items-center gap-2'>
           {/* Switch to single view */}
           <SwitchToSingleButton onClick={onSwitchToSingleView} />
-          <ChatPanel />
+          <ChatPanel symbol={symbol}/>
         </div>
       </div>
 

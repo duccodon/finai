@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, X, ArrowUpRight } from 'lucide-react';
 
-const ChatPanel = () => {
-  const [isOpen, setIsOpen] = useState(false);
+type ChatPanelProps = {
+  symbol?: string;
+};
 
-  // Sample data with multiple news items
-  const newsData = [
+const ChatPanel = ({ symbol }: ChatPanelProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [newsData, setNewsData] = useState([
     {
       title: 'Crypto ‘buy the dip’ calls are spiking, which may signal more downside',
       content: 'Crypto ‘buy the dip’ calls are spiking, which may signal more downside Buy the\ndip mentions on social media are climbing as Bitcoin falls, which could be a\nsign the market hasn’t bottomed yet, Santiment says.',
@@ -57,7 +59,45 @@ const ChatPanel = () => {
       link: 'https://example.com/stablecoin-adoption',
       tags: ['Stablecoin', 'Adoption']
     }
-  ];
+  ]);
+
+  const fetchNews = async () => {
+    console.log("Fetching news for symbol:", symbol);
+    try {
+      if (!symbol) {
+        console.error("No symbol provided");
+        return;
+      }
+
+      const url = `/api/news/${symbol}`;
+      console.log("Full URL:", url);
+
+      const response = await fetch(url);
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+      // First check the content type
+      const contentType = response.headers.get('content-type');
+      console.log("Content-Type:", contentType);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Check if response is JSON before parsing
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        console.log("News data:", data);
+      } else {
+        // If not JSON, read as text to see what we're getting
+        const text = await response.text();
+        console.log("Non-JSON response:", text.substring(0, 200)); // First 200 chars
+        throw new Error(`Expected JSON but got: ${contentType}`);
+      }
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
+  };
 
   return (
     <>
@@ -74,9 +114,8 @@ const ChatPanel = () => {
       </Button>
 
       <div
-        className={`fixed right-0 top-0 h-full w-80 border-l bg-background shadow-lg transition-transform duration-300 z-10 ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed right-0 top-0 h-full w-80 border-l bg-background shadow-lg transition-transform duration-300 z-10 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="flex flex-col h-full">
           <div className="p-1 pl-4 border-b flex justify-between items-center">
@@ -110,9 +149,9 @@ const ChatPanel = () => {
                       <p className="text-sm text-muted-foreground mb-3">
                         {news.content.split(/\s+/).slice(0, 30).join(' ')}...
                       </p>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="w-full"
                         onClick={() => window.open(news.link, '_blank')}
                       >
@@ -127,7 +166,7 @@ const ChatPanel = () => {
           </div>
 
           <div className="p-4 flex justify-center">
-            <Button className="w-full">Fetch News</Button>
+            <Button className="w-full" onClick={fetchNews}>Fetch News</Button>
           </div>
         </div>
       </div>

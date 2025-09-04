@@ -33,6 +33,12 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
             },
+            "/api/news": {
+                target: "http://localhost:5003",
+                changeOrigin: true,
+                secure: false,
+                rewrite: (path) => path.replace(/^\/api\/news/, '/api/v1/news')
+            },
         },
     },
 });

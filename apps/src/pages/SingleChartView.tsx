@@ -54,10 +54,10 @@ export const SingleChartView: React.FC<Props> = ({ onSwitchToMultiView }) => {
           macdOn={macdOn}
           setMacdOn={setMacdOn}
         />
-        <div className='fixed right-4 top-4 z-20 flex items-center gap-2 mb-3'>
+        <div className='right-4 top-4 z-20 flex items-center gap-2 mb-3'>
           {' '}
           <SwitchToMultiButton onClick={onSwitchToMultiView} />
-          <ChatPanel />
+          <ChatPanel symbol={symbol}/>
         </div>
       </div>
 
