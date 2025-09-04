@@ -1,388 +1,495 @@
-import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/auth/auth.helper";
-import type { User } from "@/types/auth";
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth/auth.helper';
+import type { User as AnyUser } from '@/types/auth';
+
+import {
+  updateMe,
+  type UpdateUserDto,
+  type PublicUser,
+} from '@/services/userService';
 
 type Profile = {
-    username: string;
-    avatarUrl?: string;
-    about?: string;
-    location?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    email?: string;
-    company?: string;
-    street?: string;
-    city?: string;
-    state?: string;
+  username: string;
+  avatarUrl?: string | null;
+  about?: string | null;
+  location?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  company?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
 };
 
 export default function ProfilePage() {
-    const { user } = useAuth();
+  const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
 
-    // start with empty values; populate from user when available
-    const [profile, setProfile] = useState<Profile>({
-        username: "",
-        avatarUrl: "",
-        about: "",
-        location: "",
-        firstName: "",
-        lastName: "",
-        phone: "",
-        email: "",
-        company: "",
-        street: "",
-        city: "",
-        state: "",
-    });
-    const [avatarPreview, setAvatarPreview] =
-        useState<string>("/avatars/lewan.jpg");
-    const [addingPhone, setAddingPhone] = useState(false);
+  // form state
+  const [profile, setProfile] = useState<Profile>({
+    username: '',
+    avatarUrl: '',
+    about: '',
+    location: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    company: '',
+    street: '',
+    city: '',
+    state: '',
+  });
 
-    // populate profile when user from useAuth becomes available
-    useEffect(() => {
-        if (!user) return;
+  // lưu bản gốc để so sánh
+  const [initialProfile, setInitialProfile] = useState<Profile | null>(null);
 
-        // use Profile type from apps/src/types/auth.ts for strong typing
-        const u = user as unknown as Profile;
-        const avatar = (user as User).avatarUrl ?? (user as User).avatar ?? "";
+  const [avatarPreview, setAvatarPreview] =
+    useState<string>('/avatars/lewan.jpg');
+  const [addingPhone, setAddingPhone] = useState(false);
 
-        setProfile({
-            username: u.username ?? "",
-            avatarUrl: u.avatarUrl ? u.avatarUrl : "/avatars/lewan.jpg",
-            about: u.about ?? "",
-            location: u.location ?? "",
-            firstName: u.firstName ?? "",
-            lastName: u.lastName ?? "",
-            phone: u.phone ?? "",
-            email: u.email ?? "",
-            company: u.company ?? "",
-            street: u.street ?? "",
-            city: u.city ?? "",
-            state: u.state ?? "",
-        });
+  // populate profile khi user có sẵn
+  useEffect(() => {
+    if (!user) return;
 
-        setAvatarPreview(String(avatar));
-    }, [user]);
+    const u = user as unknown as Record<string, unknown>;
+    const avatar =
+      (u['avatarUrl'] as string) ??
+      (u['avatar'] as string) ??
+      '/avatars/lewan.jpg';
 
-    // if user not loaded / not signed in, show message (or replace with spinner)
-    if (!user) {
-        return <div className="p-8">Not signed in</div>;
+    const next: Profile = {
+      username: (u['username'] as string) ?? '',
+      avatarUrl: (u['avatarUrl'] as string) ?? '/avatars/lewan.jpg',
+      about: (u['about'] as string) ?? '',
+      location: (u['location'] as string) ?? '',
+      firstName: (u['firstName'] as string) ?? '',
+      lastName: (u['lastName'] as string) ?? '',
+      phone: (u['phone'] as string) ?? '',
+      email: (u['email'] as string) ?? '',
+      company: (u['company'] as string) ?? '',
+      street: (u['street'] as string) ?? '',
+      city: (u['city'] as string) ?? '',
+      state: (u['state'] as string) ?? '',
+    };
+
+    setProfile(next);
+    setInitialProfile(next);
+    setAvatarPreview(String(avatar));
+  }, [user]);
+
+  if (!user) {
+    return <div className="p-8">Not signed in</div>;
+  }
+
+  const onChange =
+    (k: keyof Profile) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setProfile((prev) => ({ ...prev, [k]: e.target.value }));
+
+  const onAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setAvatarPreview(url);
+    // Nếu sau này có upload thật, bạn upload file tại đây, nhận URL => set profile.avatarUrl = URL tuyệt đối
+  };
+
+  // Tạo patch chỉ gồm field thay đổi; bỏ qua avatarUrl nếu preview chỉ là blob local
+  function buildPatch(
+    current: Profile,
+    baseline: Profile | null,
+    previewUrl: string
+  ): UpdateUserDto {
+    const patch: UpdateUserDto = {};
+
+    const keys: (keyof Profile)[] = [
+      'username',
+      'about',
+      'location',
+      'firstName',
+      'lastName',
+      'phone',
+      'email',
+      'company',
+      'street',
+      'city',
+      'state',
+      'avatarUrl',
+    ];
+
+    for (const k of keys) {
+      const cur = (current[k] ?? null) as string | null;
+      const base = (baseline ? baseline[k] : undefined) ?? null;
+
+      if (cur !== base) {
+        patch[k] = cur as any;
+      }
     }
 
-    const onChange =
-        (k: keyof Profile) =>
-        (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-            setProfile((prev) => ({ ...prev, [k]: e.target.value }));
+    if (previewUrl?.startsWith('blob:')) {
+      delete patch.avatarUrl;
+    }
 
-    const onAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        setAvatarPreview(url);
-    };
+    return patch;
+  }
 
-    const saveChanges = () => {
-        // replace with real API call
-        console.debug("Saving profile", profile, "avatar:", avatarPreview);
-        alert("Profile saved (mock). Check console for payload.");
-    };
+  const saveChanges = async () => {
+    // user từ context có type rộng; ép lấy id an toàn
+    const userId = (user as unknown as Record<string, unknown>)?.['id'] as
+      | string
+      | undefined;
 
-    const changePassword = () => {
-        alert("Change password flow (mock)");
-    };
+    if (!userId) {
+      alert('User not found');
+      return;
+    }
 
-    const changeEmail = () => {
-        alert("Change email flow (mock)");
-    };
+    try {
+      setSaving(true);
 
-    console.log("User ID current >>>", user.id);
-    console.log("Profile current >>>", profile);
+      const patch = buildPatch(profile, initialProfile, avatarPreview);
 
-    return (
-        <div className="p-8">
-            <h2 className="text-2xl font-bold mb-6">Account settings</h2>
+      if (Object.keys(patch).length === 0) {
+        alert('Nothing to update');
+        return;
+      }
 
-            {/* center the two cards and top-align their content */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-5xl mx-auto">
-                {/* Left: Information card (smaller) */}
-                <div className="lg:col-span-6 bg-white border rounded-lg p-4 shadow-sm text-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 className="text-gray-800 font-semibold text-sm">
-                                INFORMATION
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                                This information will be publicly displayed and
-                                visible for all users.
-                            </p>
-                        </div>
-                        <span className="text-xs bg-rose-500 text-white px-2 py-1 rounded">
-                            Pro
-                        </span>
-                    </div>
+      const updated = await updateMe(userId, patch);
 
-                    <div className="space-y-3">
-                        <div>
-                            <Label htmlFor="username" className="text-sm">
-                                Username
-                            </Label>
-                            <Input
-                                id="username"
-                                value={profile.username}
-                                onChange={onChange("username")}
-                                className="h-9 text-sm"
-                            />
-                        </div>
+      // Đồng bộ lại form theo dữ liệu server
+      const normalized: Profile = {
+        username: updated.username ?? '',
+        avatarUrl: updated.avatarUrl ?? '/avatars/lewan.jpg',
+        about: updated.about ?? '',
+        location: updated.location ?? '',
+        firstName: updated.firstName ?? '',
+        lastName: updated.lastName ?? '',
+        phone: updated.phone ?? '',
+        email: updated.email ?? '',
+        company: updated.company ?? '',
+        street: updated.street ?? '',
+        city: updated.city ?? '',
+        state: updated.state ?? '',
+      };
 
-                        <div>
-                            <Label className="text-sm">Avatar</Label>
-                            <div className="flex items-center gap-3">
-                                <img
-                                    src={
-                                        avatarPreview !== ""
-                                            ? avatarPreview
-                                            : "/avatars/lewan.jpg"
-                                    }
-                                    alt="avatar"
-                                    className="w-20 h-20 rounded-md object-cover border"
-                                />
-                                <div>
-                                    <input
-                                        id="avatar"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={onAvatar}
-                                    />
-                                    <p className="text-xs text-gray-500 mt-2">
-                                        JPG or PNG. Max size 700KB.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+      setProfile(normalized);
+      setInitialProfile(normalized);
+      if (updated.avatarUrl) setAvatarPreview(updated.avatarUrl);
 
-                        <div>
-                            <Label htmlFor="about" className="text-sm">
-                                About
-                            </Label>
-                            <textarea
-                                id="about"
-                                value={profile.about}
-                                onChange={onChange("about")}
-                                className={cn(
-                                    "w-full rounded-md border px-3 py-2 text-sm",
-                                    "min-h-[6rem]"
-                                )}
-                            />
-                        </div>
+      alert('Profile saved successfully');
+      console.debug('Updated user >>>', updated);
+    } catch (err) {
+      console.error(err);
+      const msg =
+        (err as any)?.response?.data?.message ??
+        (err as any)?.message ??
+        'Failed to save profile';
+      alert(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                        <div>
-                            <Label htmlFor="location" className="text-sm">
-                                Location
-                            </Label>
-                            <Input
-                                id="location"
-                                value={profile.location}
-                                onChange={onChange("location")}
-                                className="h-9 text-sm"
-                            />
-                        </div>
+  const changePassword = () => {
+    alert('Change password flow (mock)');
+  };
 
-                        <div className="text-right">
-                            <Button
-                                onClick={saveChanges}
-                                className="py-2 px-4 text-sm">
-                                Save changes
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+  const changeEmail = () => {
+    alert('Change email flow (mock)');
+  };
 
-                {/* Right: Private details (wider + taller) */}
-                <div className="lg:col-span-6 bg-white border rounded-lg p-8 shadow-sm min-h-[40rem]">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 className="text-gray-800 font-semibold text-sm">
-                                PRIVATE DETAILS
-                            </h3>
-                            <p className="text-xs text-gray-500 mt-1">
-                                This information will not be publicly displayed.
-                            </p>
-                        </div>
-                        <div className="w-10" />
-                    </div>
+  console.log('User ID current >>>', (user as any)?.id);
+  console.log('Profile current >>>', profile);
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <Label className="text-sm">Password</Label>
-                            </div>
-                            <div>
-                                <Button
-                                    onClick={changePassword}
-                                    variant="secondary"
-                                    className="text-sm py-2">
-                                    Change password
-                                </Button>
-                            </div>
-                        </div>
+  return (
+    <div className="p-8">
+      <h2 className="text-2xl font-bold mb-6">Account settings</h2>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <Label htmlFor="firstName" className="text-sm">
-                                    First name
-                                </Label>
-                                <Input
-                                    id="firstName"
-                                    value={profile.firstName}
-                                    onChange={onChange("firstName")}
-                                    className="h-9 text-sm"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="lastName" className="text-sm">
-                                    Last name
-                                </Label>
-                                <Input
-                                    id="lastName"
-                                    value={profile.lastName}
-                                    onChange={onChange("lastName")}
-                                    className="h-9 text-sm"
-                                />
-                            </div>
-                        </div>
+      {/* center the two cards and top-align their content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-5xl mx-auto">
+        {/* Left: Information card (smaller) */}
+        <div className="lg:col-span-6 bg-white border rounded-lg p-4 shadow-sm text-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-gray-800 font-semibold text-sm">
+                INFORMATION
+              </h3>
+              <p className="text-xs text-gray-500">
+                This information will be publicly displayed and visible for all
+                users.
+              </p>
+            </div>
+            <span className="text-xs bg-rose-500 text-white px-2 py-1 rounded">
+              Pro
+            </span>
+          </div>
 
-                        <div className="flex items-start gap-4">
-                            <div className="flex-1">
-                                <Label htmlFor="phone" className="text-sm">
-                                    Phone
-                                </Label>
-                                <Input
-                                    id="phone"
-                                    value={profile.phone}
-                                    onChange={onChange("phone")}
-                                    className="h-9 text-sm"
-                                />
-                            </div>
-                            <div className="pt-6">
-                                <Button
-                                    onClick={() => setAddingPhone(true)}
-                                    variant="outline"
-                                    className="text-sm py-2">
-                                    + Add phone number
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                            <div className="flex-1">
-                                <Label htmlFor="email" className="text-sm">
-                                    Email
-                                </Label>
-                                <Input
-                                    id="email"
-                                    value={profile.email}
-                                    onChange={onChange("email")}
-                                    className="h-9 text-sm"
-                                />
-                            </div>
-                            <div className="pt-6">
-                                <Button
-                                    onClick={changeEmail}
-                                    variant="outline"
-                                    className="text-sm py-2">
-                                    + Change email
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="company" className="text-sm">
-                                Company
-                            </Label>
-                            <Input
-                                id="company"
-                                value={profile.company}
-                                onChange={onChange("company")}
-                                className="h-9 text-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="street" className="text-sm">
-                                Street
-                            </Label>
-                            <Input
-                                id="street"
-                                value={profile.street}
-                                onChange={onChange("street")}
-                                className="h-9 text-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="city" className="text-sm">
-                                City
-                            </Label>
-                            <Input
-                                id="city"
-                                value={profile.city}
-                                onChange={onChange("city")}
-                                className="h-9 text-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="state" className="text-sm">
-                                State/Region
-                            </Label>
-                            <Input
-                                id="state"
-                                value={profile.state}
-                                onChange={onChange("state")}
-                                className="h-9 text-sm"
-                            />
-                        </div>
-                    </div>
-                </div>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="username" className="text-sm">
+                Username
+              </Label>
+              <Input
+                id="username"
+                value={profile.username}
+                onChange={onChange('username')}
+                className="h-9 text-sm"
+              />
             </div>
 
-            {/* optional small phone input modal / inline quick add */}
-            {addingPhone && (
-                <div className="fixed inset-0 grid place-items-center bg-black/40">
-                    <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
-                        <h4 className="font-semibold mb-3">Add phone number</h4>
-                        <Input
-                            placeholder="Phone"
-                            onChange={(e) =>
-                                setProfile((p) => ({
-                                    ...p,
-                                    phone: e.target.value,
-                                }))
-                            }
-                        />
-                        <div className="mt-4 text-right">
-                            <Button
-                                variant="ghost"
-                                onClick={() => setAddingPhone(false)}>
-                                Cancel
-                            </Button>
-                            <Button
-                                className="ml-2"
-                                onClick={() => {
-                                    setAddingPhone(false);
-                                    saveChanges();
-                                }}>
-                                Save
-                            </Button>
-                        </div>
-                    </div>
+            <div>
+              <Label className="text-sm">Avatar</Label>
+              <div className="flex items-center gap-3">
+                <img
+                  src={
+                    avatarPreview !== '' ? avatarPreview : '/avatars/lewan.jpg'
+                  }
+                  alt="avatar"
+                  className="w-20 h-20 rounded-md object-cover border"
+                />
+                <div>
+                  <input
+                    id="avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={onAvatar}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    JPG or PNG. Max size 700KB.
+                  </p>
                 </div>
-            )}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="about" className="text-sm">
+                About
+              </Label>
+              <textarea
+                id="about"
+                value={profile.about ?? ''}
+                onChange={onChange('about')}
+                className={cn(
+                  'w-full rounded-md border px-3 py-2 text-sm',
+                  'min-h-[6rem]'
+                )}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="location" className="text-sm">
+                Location
+              </Label>
+              <Input
+                id="location"
+                value={profile.location ?? ''}
+                onChange={onChange('location')}
+                className="h-9 text-sm"
+              />
+            </div>
+
+            <div className="text-right">
+              <Button
+                onClick={saveChanges}
+                className="py-2 px-4 text-sm"
+                disabled={saving}
+              >
+                {saving ? 'Saving...' : 'Save changes'}
+              </Button>
+            </div>
+          </div>
         </div>
-    );
+
+        {/* Right: Private details (wider + taller) */}
+        <div className="lg:col-span-6 bg-white border rounded-lg p-8 shadow-sm min-h-[40rem]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-gray-800 font-semibold text-sm">
+                PRIVATE DETAILS
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                This information will not be publicly displayed.
+              </p>
+            </div>
+            <div className="w-10" />
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm">Password</Label>
+              </div>
+              <div>
+                <Button
+                  onClick={changePassword}
+                  variant="secondary"
+                  className="text-sm py-2"
+                >
+                  Change password
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="firstName" className="text-sm">
+                  First name
+                </Label>
+                <Input
+                  id="firstName"
+                  value={profile.firstName ?? ''}
+                  onChange={onChange('firstName')}
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName" className="text-sm">
+                  Last name
+                </Label>
+                <Input
+                  id="lastName"
+                  value={profile.lastName ?? ''}
+                  onChange={onChange('lastName')}
+                  className="h-9 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <Label htmlFor="phone" className="text-sm">
+                  Phone
+                </Label>
+                <Input
+                  id="phone"
+                  value={profile.phone ?? ''}
+                  onChange={onChange('phone')}
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div className="pt-6">
+                <Button
+                  onClick={() => setAddingPhone(true)}
+                  variant="outline"
+                  className="text-sm py-2"
+                >
+                  + Add phone number
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <Label htmlFor="email" className="text-sm">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  value={profile.email ?? ''}
+                  onChange={onChange('email')}
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div className="pt-6">
+                <Button
+                  onClick={changeEmail}
+                  variant="outline"
+                  className="text-sm py-2"
+                >
+                  + Change email
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="company" className="text-sm">
+                Company
+              </Label>
+              <Input
+                id="company"
+                value={profile.company ?? ''}
+                onChange={onChange('company')}
+                className="h-9 text-sm"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="street" className="text-sm">
+                Street
+              </Label>
+              <Input
+                id="street"
+                value={profile.street ?? ''}
+                onChange={onChange('street')}
+                className="h-9 text-sm"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="city" className="text-sm">
+                City
+              </Label>
+              <Input
+                id="city"
+                value={profile.city ?? ''}
+                onChange={onChange('city')}
+                className="h-9 text-sm"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="state" className="text-sm">
+                State/Region
+              </Label>
+              <Input
+                id="state"
+                value={profile.state ?? ''}
+                onChange={onChange('state')}
+                className="h-9 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* optional small phone input modal / inline quick add */}
+      {addingPhone && (
+        <div className="fixed inset-0 grid place-items-center bg-black/40">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+            <h4 className="font-semibold mb-3">Add phone number</h4>
+            <Input
+              placeholder="Phone"
+              onChange={(e) =>
+                setProfile((p) => ({
+                  ...p,
+                  phone: e.target.value,
+                }))
+              }
+            />
+            <div className="mt-4 text-right">
+              <Button variant="ghost" onClick={() => setAddingPhone(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="ml-2"
+                onClick={() => {
+                  setAddingPhone(false);
+                  void saveChanges();
+                }}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
