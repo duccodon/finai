@@ -11,6 +11,11 @@ RUN apk add --no-cache netcat-openbsd
 COPY . .
 
 # ensure entrypoint exists at ./entrypoint.sh (relative to build context)
-RUN chmod +x /app/entrypoint.sh
+# Copy entrypoint.sh to a safe place outside /app
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+# Fix Windows CRLF endings if present, then make it executable
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
 
-CMD [ "sh", "-c", "/app/entrypoint.sh" ]
+# Use entrypoint directly
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
