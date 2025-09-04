@@ -21,6 +21,8 @@ type Props = {
   tickSize?: number;
   className?: string;
   children?: React.ReactNode; // overlays
+  hideOverlay?: boolean;
+  hideConnection?: boolean;
 };
 
 const chartColors = {
@@ -40,6 +42,8 @@ export const CandleChart: React.FC<Props> = ({
   tickSize = 0.01,
   className,
   children,
+  hideOverlay = false,
+  hideConnection = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { width: containerW } = useResizeObserver(containerRef);
@@ -264,20 +268,24 @@ export const CandleChart: React.FC<Props> = ({
       <div className="mt-4 border rounded-[10px] bg-white overflow-hidden">
         <div className="relative">
           <div ref={containerRef} className="w-full min-h-[420px]" />
-          <div
-            ref={overlayRootRef}
-            className="absolute inset-0 pointer-events-none z-50"
-          />
+          {!hideOverlay && (
+            <div
+              ref={overlayRootRef}
+              className="absolute inset-0 pointer-events-none z-50"
+            />
+          )}
         </div>
         {/* Trạng thái kết nối */}
-        <div className="m-2 text-xs flex items-center gap-2">
-          <span
-            className={`h-2.5 w-2.5 rounded-full ${
-              isConnected ? 'bg-green-500' : 'bg-red-500'
-            }`}
-          />
-          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
-        </div>
+        {!hideConnection && (
+          <div className="m-2 text-xs flex items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                isConnected ? 'bg-green-500' : 'bg-red-500'
+              }`}
+            />
+            <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+          </div>
+        )}
       </div>
 
       {/* Provider bọc overlays */}

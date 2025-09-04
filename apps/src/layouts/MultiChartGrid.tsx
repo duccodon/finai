@@ -23,7 +23,13 @@ export const MultiChartGrid: React.FC<Props> = ({
           className="p-4 border rounded-[10px]"
           style={{ borderColor }}
         >
-          <CandleChart symbol={symbol} interval={int} tickSize={tickSize} />
+          <CandleChart
+            symbol={symbol}
+            interval={int}
+            tickSize={tickSize}
+            hideOverlay={true}
+            hideConnection={true}
+          />
         </div>
       ))}
     </div>

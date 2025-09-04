@@ -1,0 +1,10 @@
+Flask>=3.0.0
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.4.0
+tensorflow==2.15.*        # CPU build; đủ dùng cho LSTM
+# Nếu bạn không dùng TF thì bỏ dòng trên
+# Thêm các thư viện khác nếu code có dùng:
+# python-binance
+# requests
+# joblib

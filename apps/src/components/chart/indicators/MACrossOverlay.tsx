@@ -102,33 +102,22 @@ export const MACrossOverlay: React.FC<{
   if (!visible || !portalTarget) return null;
 
   // Legend UI
-  const closes = getCloses();
-  const last = closes.length - 1;
-  const emaF = last >= 0 ? emaArray(closes, fast)[last] : undefined;
-  const emaS = last >= 0 ? emaArray(closes, slow)[last] : undefined;
-
   return createPortal(
-    <div className="absolute top-1 left-1 pointer-events-auto">
+    <div className="absolute top-1 left-1 pointer-events-auto p-3">
       <div className="flex items-center gap-3 rounded-md bg-white/85 backdrop-blur py-1 shadow text-[11px] leading-none">
         <div className="flex items-center gap-1">
           <span
             className="inline-block h-2 w-4 rounded"
             style={{ background: fastColor }}
           />
-          <span>
-            EMA {fast}
-            {emaF !== undefined ? `: ${emaF.toFixed(2)}` : ''}
-          </span>
+          <span>EMA {fast}</span>
         </div>
         <div className="flex items-center gap-1">
           <span
             className="inline-block h-2 w-4 rounded"
             style={{ background: slowColor }}
           />
-          <span>
-            EMA {slow}
-            {emaS !== undefined ? `: ${emaS.toFixed(2)}` : ''}
-          </span>
+          <span>EMA {slow}</span>
         </div>
       </div>
     </div>,
