@@ -9,6 +9,8 @@ import { MACrossOverlay } from '@/components/chart/indicators/MACrossOverlay';
 import { RSIPanel } from '@/components/chart/indicators/RSIPanel';
 import { MACDPanel } from '@/components/chart/indicators/MACDPanel';
 import { SwitchToMultiButton } from '@/components/chart/ViewSwitchButtons';
+import ChatPanel from '@/components/chat/ChatPanel';
+
 const intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 const borderColor = 'rgba(132,130,130,0.37)';
 
@@ -52,9 +54,10 @@ export const SingleChartView: React.FC<Props> = ({ onSwitchToMultiView }) => {
           macdOn={macdOn}
           setMacdOn={setMacdOn}
         />
-        <div className="mb-3">
+        <div className='fixed right-4 top-4 z-20 flex items-center gap-2 mb-3'>
           {' '}
           <SwitchToMultiButton onClick={onSwitchToMultiView} />
+          <ChatPanel />
         </div>
       </div>
 
@@ -64,7 +67,7 @@ export const SingleChartView: React.FC<Props> = ({ onSwitchToMultiView }) => {
           symbol={symbol}
           interval={interval}
           tickSize={meta?.tickSize ?? 0.01}
-          // sau này sẽ dùng maCrossOn để overlay MA fast/slow
+        // sau này sẽ dùng maCrossOn để overlay MA fast/slow
         >
           {' '}
           {<MACrossOverlay fast={30} slow={90} visible={maCrossOn} />}

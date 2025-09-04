@@ -6,6 +6,8 @@ import { useExchangeInfo } from '@/hooks/useExchangeInfo';
 import { SwitchToSingleButton } from '@/components/chart/ViewSwitchButtons';
 import IntervalConfigDialog from '@/components/chart/IntervalConfigDialog';
 import { Clock } from 'lucide-react';
+import ChatPanel from '@/components/chat/ChatPanel';
+
 
 const defaultIntervals = ['1m', '15m', '1h', '4h'] as const;
 const borderColor = 'rgba(132,130,130,0.37)';
@@ -52,8 +54,11 @@ export const MultiChartView: React.FC<Props> = ({ onSwitchToSingleView }) => {
           </div>
         </div>
 
-        {/* Switch to single view */}
-        <SwitchToSingleButton onClick={onSwitchToSingleView} />
+        <div className='fixed right-4 top-4 z-20 flex items-center gap-2'>
+          {/* Switch to single view */}
+          <SwitchToSingleButton onClick={onSwitchToSingleView} />
+          <ChatPanel />
+        </div>
       </div>
 
       {/* Dialogs */}
