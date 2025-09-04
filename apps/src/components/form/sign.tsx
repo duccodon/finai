@@ -1,3 +1,4 @@
+// ...existing code...
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +35,11 @@ export function AuthForm({
 
     return (
         <div className={cn("flex flex-col gap-6", className)}>
-            <Card>
+            {/* Expand the card only for signup mode */}
+            <Card
+                className={cn(
+                    mode === "signup" ? "max-w-4xl w-full mx-auto" : ""
+                )}>
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">
                         {mode === "signin"
@@ -56,114 +61,96 @@ export function AuthForm({
                         <div className="grid gap-6">
                             {/* Social login buttons - hide in forgot mode */}
                             {mode !== "forgot" && (
-                                <>
-                                    <div className="flex flex-col gap-4">
-                                        <Button
-                                            variant="outline"
-                                            className="w-full"
-                                            type="button">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24">
-                                                <path
-                                                    d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                                                    fill="currentColor"
-                                                />
-                                            </svg>
-                                            {mode === "signin"
-                                                ? "Login with Apple"
-                                                : "Sign up with Apple"}
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full"
-                                            type="button">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24">
-                                                <path
-                                                    d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                                                    fill="currentColor"
-                                                />
-                                            </svg>
-                                            {mode === "signin"
-                                                ? "Login with Google"
-                                                : "Sign up with Google"}
-                                        </Button>
-                                    </div>
-                                    <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                                        <span className="bg-card text-muted-foreground relative z-10 px-2">
-                                            Or continue with email
-                                        </span>
-                                    </div>
-                                </>
+                                <>{/* ...existing code... */}</>
                             )}
 
-                            <div className="grid gap-6">
-                                {/* Username field - only for signup */}
-                                {mode === "signup" && (
-                                    <div className="grid gap-3">
-                                        <Label htmlFor="username">
-                                            Username
-                                        </Label>
-                                        <Input
-                                            id="username"
-                                            name="username"
-                                            type="text"
-                                            placeholder="Enter your username"
-                                            required
-                                        />
-                                    </div>
-                                )}
+                            {/* For signup, split into two columns to avoid vertical overflow.
+                                On other modes keep single-column layout. */}
+                            {mode === "signup" ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Left column */}
+                                    <div className="flex flex-col gap-6">
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="username">
+                                                Username
+                                            </Label>
+                                            <Input
+                                                id="username"
+                                                name="username"
+                                                type="text"
+                                                placeholder="Enter your username"
+                                                required
+                                            />
+                                        </div>
 
-                                {/* Email field - for all modes */}
-                                <div className="grid gap-3">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="m@example.com"
-                                        required
-                                    />
-                                </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="firstName">
+                                                    First name
+                                                </Label>
+                                                <Input
+                                                    id="firstName"
+                                                    name="firstName"
+                                                    type="text"
+                                                    placeholder="First name"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="lastName">
+                                                    Last name
+                                                </Label>
+                                                <Input
+                                                    id="lastName"
+                                                    name="lastName"
+                                                    type="text"
+                                                    placeholder="Last name"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
 
-                                {/* Phone field - only for signup */}
-                                {mode === "signup" && (
-                                    <div className="grid gap-3">
-                                        <Label htmlFor="phone">
-                                            Phone Number
-                                        </Label>
-                                        <Input
-                                            id="phone"
-                                            name="phone"
-                                            type="tel"
-                                            placeholder="Enter your phone number"
-                                            required
-                                        />
-                                    </div>
-                                )}
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input
+                                                id="email"
+                                                name="email"
+                                                type="email"
+                                                placeholder="m@example.com"
+                                                required
+                                            />
+                                        </div>
 
-                                {/* Password fields - hide in forgot mode */}
-                                {mode !== "forgot" && (
-                                    <>
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="dob">
+                                                Date of Birth *
+                                            </Label>
+                                            <Input
+                                                id="dob"
+                                                name="dob"
+                                                type="date"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="phone">
+                                                Phone Number
+                                            </Label>
+                                            <Input
+                                                id="phone"
+                                                name="phone"
+                                                type="tel"
+                                                placeholder="Enter your phone number"
+                                                required
+                                            />
+                                        </div>
+
                                         <div className="grid gap-3">
                                             <div className="flex items-center">
                                                 <Label htmlFor="password">
                                                     Password
                                                 </Label>
-                                                {mode === "signin" &&
-                                                    onForgotPassword && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={
-                                                                onForgotPassword
-                                                            }
-                                                            className="ml-auto text-sm underline-offset-4 hover:underline">
-                                                            Forgot your
-                                                            password?
-                                                        </button>
-                                                    )}
                                             </div>
                                             <Input
                                                 id="password"
@@ -173,34 +160,170 @@ export function AuthForm({
                                             />
                                         </div>
 
-                                        {/* Confirm Password - only for signup */}
-                                        {mode === "signup" && (
-                                            <div className="grid gap-3">
+                                        <div className="grid gap-3">
+                                            <div className="flex items-center">
                                                 <Label htmlFor="confirmPassword">
-                                                    Confirm Password
+                                                    Confirm Password *
+                                                </Label>
+                                            </div>
+                                            <Input
+                                                id="confirmPassword"
+                                                name="confirmPassword"
+                                                type="password"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Right column */}
+                                    <div className="flex flex-col gap-6">
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="location">
+                                                Location
+                                            </Label>
+                                            <Input
+                                                id="location"
+                                                name="location"
+                                                type="text"
+                                                placeholder="Country / Region"
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="company">
+                                                Company
+                                            </Label>
+                                            <Input
+                                                id="company"
+                                                name="company"
+                                                type="text"
+                                                placeholder="Company"
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="street">
+                                                Street
+                                            </Label>
+                                            <Input
+                                                id="street"
+                                                name="street"
+                                                type="text"
+                                                placeholder="Street address"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="city">
+                                                    City
                                                 </Label>
                                                 <Input
-                                                    id="confirmPassword"
-                                                    name="confirmPassword"
+                                                    id="city"
+                                                    name="city"
+                                                    type="text"
+                                                    placeholder="City"
+                                                />
+                                            </div>
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="state">
+                                                    State / Region
+                                                </Label>
+                                                <Input
+                                                    id="state"
+                                                    name="state"
+                                                    type="text"
+                                                    placeholder="State or region"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-3">
+                                            <Label htmlFor="about">About</Label>
+                                            <textarea
+                                                id="about"
+                                                name="about"
+                                                placeholder="Tell us a bit about yourself"
+                                                className="w-full rounded-md border bg-transparent px-3 py-2 min-h-[13rem] text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Submit button spans both columns */}
+                                    <div className="md:col-span-2">
+                                        <Button
+                                            type="submit"
+                                            className="w-full">
+                                            Create account
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Non-signup modes: keep original single-column layout
+                                <div className="grid gap-6">
+                                    {/* Email field - for all modes */}
+                                    <div className="grid gap-3">
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            placeholder="m@example.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Password fields - hide in forgot mode */}
+                                    {mode !== "forgot" && (
+                                        <>
+                                            <div className="grid gap-3">
+                                                <div className="flex items-center">
+                                                    <Label htmlFor="password">
+                                                        Password
+                                                    </Label>
+                                                    {mode === "signin" &&
+                                                        onForgotPassword && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={
+                                                                    onForgotPassword
+                                                                }
+                                                                className="ml-auto text-sm underline-offset-4 hover:underline">
+                                                                Forgot your
+                                                                password?
+                                                            </button>
+                                                        )}
+                                                </div>
+                                                <Input
+                                                    id="password"
+                                                    name="password"
                                                     type="password"
                                                     required
                                                 />
                                             </div>
-                                        )}
-                                    </>
-                                )}
 
-                                <Button type="submit" className="w-full">
-                                    {mode === "signin"
-                                        ? "Login"
-                                        : mode === "signup"
-                                        ? "Create account"
-                                        : "Send Reset Link"}
-                                </Button>
-                            </div>
+                                            {mode === "signin" && (
+                                                <Button
+                                                    type="submit"
+                                                    className="w-full">
+                                                    Login
+                                                </Button>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {mode === "forgot" && (
+                                        <Button
+                                            type="submit"
+                                            className="w-full">
+                                            Send Reset Link
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Toggle mode - hide in forgot mode */}
-                            {mode !== "forgot" && (
+                            {mode !== "forgot" && mode !== "signup" && (
                                 <div className="text-center text-sm">
                                     {mode === "signin"
                                         ? "Don't have an account?"
@@ -212,6 +335,19 @@ export function AuthForm({
                                         {mode === "signin"
                                             ? "Sign up"
                                             : "Sign in"}
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* For signup, show toggle below the columns */}
+                            {mode === "signup" && (
+                                <div className="text-center text-sm md:col-span-2">
+                                    Already have an account?{" "}
+                                    <button
+                                        type="button"
+                                        onClick={onToggleMode}
+                                        className="text-primary underline-offset-4 hover:underline">
+                                        Sign in
                                     </button>
                                 </div>
                             )}
@@ -227,3 +363,4 @@ export function AuthForm({
         </div>
     );
 }
+//

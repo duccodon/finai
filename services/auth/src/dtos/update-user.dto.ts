@@ -1,45 +1,16 @@
 import {
-  registerDecorator,
-  ValidationOptions,
-  ValidationArguments,
-  IsEmail,
-  IsString,
-  IsOptional,
-  MinLength,
-  IsNotEmpty,
-  Matches,
   IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
   MaxLength,
+  MinLength,
 } from 'class-validator';
+import { Match } from './signup.dto';
 
-/**
- * Simple property-match decorator to validate confirmPassword === password
- */
-export function Match(property: string, validationOptions?: ValidationOptions) {
-  return (object: object, propertyName: string) => {
-    const target = (object as { constructor: { new (...args: unknown[]): unknown } }).constructor;
-    registerDecorator({
-      name: 'match',
-      target,
-      propertyName,
-      options: validationOptions,
-      constraints: [property],
-      validator: {
-        validate(value: unknown, args: ValidationArguments) {
-          const [relatedPropertyName] = args.constraints as [string];
-          const obj = args.object as Record<string, unknown>;
-          return value === obj[relatedPropertyName];
-        },
-        defaultMessage(args: ValidationArguments) {
-          const [relatedPropertyName] = args.constraints as [string];
-          return `${args.property} must match ${relatedPropertyName}`;
-        },
-      },
-    });
-  };
-}
-
-export class SignupDto {
+export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
   username!: string;

@@ -62,6 +62,15 @@ function AuthPage() {
                     confirmPassword: data.confirmPassword,
                     phone: data?.phone,
                     username: data?.username,
+                    firstName: data?.firstName,
+                    lastName: data?.lastName,
+                    dob: data?.dob,
+                    location: data?.location,
+                    company: data?.company,
+                    street: data?.street,
+                    city: data?.city,
+                    state: data?.state,
+                    about: data?.about,
                 });
                 setMode("signin");
                 pushNote({

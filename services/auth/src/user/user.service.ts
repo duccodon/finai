@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { SigninDto } from 'src/dtos/signin.dto';
 import { SignupDto } from 'src/dtos/signup.dto';
 import { PrismaService } from 'prisma/prisma.services';
+import { UpdateUserDto } from 'src/dtos/update-user.dto';
 
 type PublicUser = Omit<User, 'password'>;
 
@@ -29,7 +30,16 @@ export class UserService {
         password: hashed,
         username: dto.username,
         phone: dto.phone,
-        status: 'PENDING',
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        // convert ISO dob string to Date (Prisma DateTime)
+        dob: dto.dob ? new Date(dto.dob) : undefined,
+        location: dto.location,
+        company: dto.company,
+        street: dto.street,
+        city: dto.city,
+        state: dto.state,
+        about: dto.about,
       },
     });
 
@@ -65,5 +75,62 @@ export class UserService {
     });
 
     return this.toPublic(updatedUser);
+  }
+
+  async getMe(userId: string) {
+    const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found!');
+
+    return this.toPublic(user);
+  }
+
+  /**
+   * Update partial user fields.
+   * dto may contain: username, email, password, phone, firstName, lastName,
+   * dob (ISO string), location, company, street, city, state, about, avatarUrl
+   */
+  async update(userId: string, dto: UpdateUserDto): Promise<PublicUser> {
+    const exists = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!exists) throw new BadRequestException('User not found');
+
+    const data: Record<string, unknown> = {};
+
+    // simple string fields
+    const fields = [
+      'username',
+      'email',
+      'phone',
+      'firstName',
+      'lastName',
+      'location',
+      'company',
+      'street',
+      'city',
+      'state',
+      'about',
+      'avatarUrl',
+    ];
+    for (const f of fields) {
+      if (Object.prototype.hasOwnProperty.call(dto, f)) {
+        data[f] = dto[f];
+      }
+    }
+
+    // handle dob
+    if (dto.dob && typeof dto.dob === 'string') {
+      data.dob = new Date(dto.dob);
+    }
+
+    // handle password (hash it)
+    if (dto.password && typeof dto.password === 'string') {
+      data.password = await bcrypt.hash(dto.password, 10);
+    }
+
+    const updated = await this.prismaService.user.update({
+      where: { id: userId },
+      data,
+    });
+
+    return this.toPublic(updated);
   }
 }
