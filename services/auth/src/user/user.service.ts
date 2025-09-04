@@ -110,11 +110,14 @@ export class UserService {
     ] as const;
 
     const data: Record<string, unknown> = {};
-    const payload = dto;
+    const payload = dto as Record<string, unknown>;
+
+    console.log('dto >>>', dto);
 
     // apply only keys that are PRESENT in the incoming DTO (undefined => not provided => keep old value)
     for (const key of simpleFields) {
-      if (Object.prototype.hasOwnProperty.call(payload, key) !== undefined) {
+      // hasOwnProperty returns boolean; check truthiness to detect presence
+      if (Object.prototype.hasOwnProperty.call(payload, key)) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const val = payload[key];
         // allow null/empty string to overwrite existing value (if client explicitly sends it)
@@ -123,7 +126,7 @@ export class UserService {
     }
 
     // dob: if present in DTO, allow clearing (null/empty) or set Date
-    if (payload.dob !== undefined) {
+    if (Object.prototype.hasOwnProperty.call(payload, 'dob')) {
       const rawDob = payload['dob'];
       if (rawDob === null || rawDob === '') {
         data.dob = null;
@@ -134,12 +137,27 @@ export class UserService {
       }
     }
 
-    // password: if present, validate & hash
-    if (payload.password !== undefined) {
+    // password: if present, require oldPassword, validate old password and hash new one
+    if (Object.prototype.hasOwnProperty.call(payload, 'password')) {
       const newPass = payload['password'];
+      const oldPass = payload['oldPassword'];
+
+      // require old password to be provided when changing password
+      if (!oldPass || typeof oldPass !== 'string') {
+        throw new BadRequestException('Old password is required to change password');
+      }
+
+      // verify old password matches current stored password
+      const match = await bcrypt.compare(oldPass, exists.password);
+      if (!match) {
+        throw new BadRequestException('Old password is incorrect');
+      }
+
+      // validate new password
       if (!newPass || typeof newPass !== 'string' || newPass.length < 6) {
         throw new BadRequestException('Password must be at least 6 characters');
       }
+
       data.password = await bcrypt.hash(newPass, 10);
     }
 

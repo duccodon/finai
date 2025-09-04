@@ -22,6 +22,10 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
+  oldPassword?: string;
+
+  @IsOptional()
+  @IsString()
   @MinLength(6, { message: 'Password must be at least $constraint1 characters' })
   password?: string;
 
