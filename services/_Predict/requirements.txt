@@ -2,13 +2,8 @@ Flask>=3.0.0
 numpy>=1.26.0
 pandas>=2.2.0
 scikit-learn>=1.4.0
-tensorflow==2.15.*       
- # CPU build; đủ dùng cho LSTM
-# Nếu bạn không dùng TF thì bỏ dòng trên
-# Thêm các thư viện khác nếu code có dùng:
-# python-binance
-# requests
-# joblib
-torch
---extra-index-url https://download.pytorch.org/whl/cpu
-matplotlib
+torch>=2.2.0
+torchvision>=0.17.0
+requests>=2.31.0
+matplotlib>=3.8.0
+h5py>=3.10.0
