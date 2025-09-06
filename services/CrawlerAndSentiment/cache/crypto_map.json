@@ -1,0 +1,1608 @@
+{
+    "BTC": {
+        "name": "Bitcoin",
+        "keywords": [
+            "Bitcoin",
+            "BTC"
+        ],
+        "yahoo_ticker": "BTC-USD"
+    },
+    "ETH": {
+        "name": "Ethereum",
+        "keywords": [
+            "Ethereum",
+            "ETH"
+        ],
+        "yahoo_ticker": "ETH-USD"
+    },
+    "USDT": {
+        "name": "Tether USDt",
+        "keywords": [
+            "Tether USDt",
+            "USDT"
+        ],
+        "yahoo_ticker": "USDT-USD"
+    },
+    "XRP": {
+        "name": "XRP",
+        "keywords": [
+            "XRP",
+            "XRP",
+            "Ripple"
+        ],
+        "yahoo_ticker": "XRP-USD"
+    },
+    "BNB": {
+        "name": "BNB",
+        "keywords": [
+            "BNB",
+            "BNB",
+            "Binance Coin"
+        ],
+        "yahoo_ticker": "BNB-USD"
+    },
+    "SOL": {
+        "name": "Solana",
+        "keywords": [
+            "Solana",
+            "SOL"
+        ],
+        "yahoo_ticker": "SOL-USD"
+    },
+    "USDC": {
+        "name": "USDC",
+        "keywords": [
+            "USDC",
+            "USDC",
+            "USD Coin"
+        ],
+        "yahoo_ticker": "USDC-USD"
+    },
+    "DOGE": {
+        "name": "Dogecoin",
+        "keywords": [
+            "Dogecoin",
+            "DOGE"
+        ],
+        "yahoo_ticker": "DOGE-USD"
+    },
+    "TRX": {
+        "name": "TRON",
+        "keywords": [
+            "TRON",
+            "TRX"
+        ],
+        "yahoo_ticker": "TRX-USD"
+    },
+    "ADA": {
+        "name": "Cardano",
+        "keywords": [
+            "Cardano",
+            "ADA"
+        ],
+        "yahoo_ticker": "ADA-USD"
+    },
+    "HYPE": {
+        "name": "Hyperliquid",
+        "keywords": [
+            "Hyperliquid",
+            "HYPE"
+        ],
+        "yahoo_ticker": "HYPE-USD"
+    },
+    "LINK": {
+        "name": "Chainlink",
+        "keywords": [
+            "Chainlink",
+            "LINK"
+        ],
+        "yahoo_ticker": "LINK-USD"
+    },
+    "USDe": {
+        "name": "Ethena USDe",
+        "keywords": [
+            "Ethena USDe",
+            "USDe"
+        ],
+        "yahoo_ticker": "USDe-USD"
+    },
+    "SUI": {
+        "name": "Sui",
+        "keywords": [
+            "Sui",
+            "SUI"
+        ],
+        "yahoo_ticker": "SUI-USD"
+    },
+    "BCH": {
+        "name": "Bitcoin Cash",
+        "keywords": [
+            "Bitcoin Cash",
+            "BCH"
+        ],
+        "yahoo_ticker": "BCH-USD"
+    },
+    "XLM": {
+        "name": "Stellar",
+        "keywords": [
+            "Stellar",
+            "XLM"
+        ],
+        "yahoo_ticker": "XLM-USD"
+    },
+    "AVAX": {
+        "name": "Avalanche",
+        "keywords": [
+            "Avalanche",
+            "AVAX"
+        ],
+        "yahoo_ticker": "AVAX-USD"
+    },
+    "HBAR": {
+        "name": "Hedera",
+        "keywords": [
+            "Hedera",
+            "HBAR"
+        ],
+        "yahoo_ticker": "HBAR-USD"
+    },
+    "CRO": {
+        "name": "Cronos",
+        "keywords": [
+            "Cronos",
+            "CRO"
+        ],
+        "yahoo_ticker": "CRO-USD"
+    },
+    "LEO": {
+        "name": "UNUS SED LEO",
+        "keywords": [
+            "UNUS SED LEO",
+            "LEO",
+            "UNUS SED LEO"
+        ],
+        "yahoo_ticker": "LEO-USD"
+    },
+    "LTC": {
+        "name": "Litecoin",
+        "keywords": [
+            "Litecoin",
+            "LTC"
+        ],
+        "yahoo_ticker": "LTC-USD"
+    },
+    "TON": {
+        "name": "Toncoin",
+        "keywords": [
+            "Toncoin",
+            "TON"
+        ],
+        "yahoo_ticker": "TON-USD"
+    },
+    "SHIB": {
+        "name": "Shiba Inu",
+        "keywords": [
+            "Shiba Inu",
+            "SHIB",
+            "Shiba Inu"
+        ],
+        "yahoo_ticker": "SHIB-USD"
+    },
+    "DOT": {
+        "name": "Polkadot",
+        "keywords": [
+            "Polkadot",
+            "DOT"
+        ],
+        "yahoo_ticker": "DOT-USD"
+    },
+    "UNI": {
+        "name": "Uniswap",
+        "keywords": [
+            "Uniswap",
+            "UNI"
+        ],
+        "yahoo_ticker": "UNI-USD"
+    },
+    "DAI": {
+        "name": "Dai",
+        "keywords": [
+            "Dai",
+            "DAI"
+        ],
+        "yahoo_ticker": "DAI-USD"
+    },
+    "ENA": {
+        "name": "Ethena",
+        "keywords": [
+            "Ethena",
+            "ENA"
+        ],
+        "yahoo_ticker": "ENA-USD"
+    },
+    "XMR": {
+        "name": "Monero",
+        "keywords": [
+            "Monero",
+            "XMR"
+        ],
+        "yahoo_ticker": "XMR-USD"
+    },
+    "WLFI": {
+        "name": "World Liberty Financial",
+        "keywords": [
+            "World Liberty Financial",
+            "WLFI"
+        ],
+        "yahoo_ticker": "WLFI-USD"
+    },
+    "AAVE": {
+        "name": "Aave",
+        "keywords": [
+            "Aave",
+            "AAVE"
+        ],
+        "yahoo_ticker": "AAVE-USD"
+    },
+    "OKB": {
+        "name": "OKB",
+        "keywords": [
+            "OKB",
+            "OKB"
+        ],
+        "yahoo_ticker": "OKB-USD"
+    },
+    "PEPE": {
+        "name": "Pepe",
+        "keywords": [
+            "Pepe",
+            "PEPE"
+        ],
+        "yahoo_ticker": "PEPE-USD"
+    },
+    "MNT": {
+        "name": "Mantle",
+        "keywords": [
+            "Mantle",
+            "MNT"
+        ],
+        "yahoo_ticker": "MNT-USD"
+    },
+    "BGB": {
+        "name": "Bitget Token",
+        "keywords": [
+            "Bitget Token",
+            "BGB"
+        ],
+        "yahoo_ticker": "BGB-USD"
+    },
+    "TAO": {
+        "name": "Bittensor",
+        "keywords": [
+            "Bittensor",
+            "TAO"
+        ],
+        "yahoo_ticker": "TAO-USD"
+    },
+    "ETC": {
+        "name": "Ethereum Classic",
+        "keywords": [
+            "Ethereum Classic",
+            "ETC"
+        ],
+        "yahoo_ticker": "ETC-USD"
+    },
+    "NEAR": {
+        "name": "NEAR Protocol",
+        "keywords": [
+            "NEAR Protocol",
+            "NEAR"
+        ],
+        "yahoo_ticker": "NEAR-USD"
+    },
+    "POL": {
+        "name": "POL (prev. MATIC)",
+        "keywords": [
+            "POL (prev. MATIC)",
+            "POL"
+        ],
+        "yahoo_ticker": "POL-USD"
+    },
+    "APT": {
+        "name": "Aptos",
+        "keywords": [
+            "Aptos",
+            "APT"
+        ],
+        "yahoo_ticker": "APT-USD"
+    },
+    "ONDO": {
+        "name": "Ondo",
+        "keywords": [
+            "Ondo",
+            "ONDO"
+        ],
+        "yahoo_ticker": "ONDO-USD"
+    },
+    "PI": {
+        "name": "Pi",
+        "keywords": [
+            "Pi",
+            "PI"
+        ],
+        "yahoo_ticker": "PI-USD"
+    },
+    "USD1": {
+        "name": "World Liberty Financial USD",
+        "keywords": [
+            "World Liberty Financial USD",
+            "USD1"
+        ],
+        "yahoo_ticker": "USD1-USD"
+    },
+    "ARB": {
+        "name": "Arbitrum",
+        "keywords": [
+            "Arbitrum",
+            "ARB"
+        ],
+        "yahoo_ticker": "ARB-USD"
+    },
+    "ICP": {
+        "name": "Internet Computer",
+        "keywords": [
+            "Internet Computer",
+            "ICP"
+        ],
+        "yahoo_ticker": "ICP-USD"
+    },
+    "IP": {
+        "name": "Story",
+        "keywords": [
+            "Story",
+            "IP"
+        ],
+        "yahoo_ticker": "IP-USD"
+    },
+    "GT": {
+        "name": "GateToken",
+        "keywords": [
+            "GateToken",
+            "GT"
+        ],
+        "yahoo_ticker": "GT-USD"
+    },
+    "KAS": {
+        "name": "Kaspa",
+        "keywords": [
+            "Kaspa",
+            "KAS"
+        ],
+        "yahoo_ticker": "KAS-USD"
+    },
+    "ATOM": {
+        "name": "Cosmos",
+        "keywords": [
+            "Cosmos",
+            "ATOM"
+        ],
+        "yahoo_ticker": "ATOM-USD"
+    },
+    "VET": {
+        "name": "VeChain",
+        "keywords": [
+            "VeChain",
+            "VET"
+        ],
+        "yahoo_ticker": "VET-USD"
+    },
+    "ALGO": {
+        "name": "Algorand",
+        "keywords": [
+            "Algorand",
+            "ALGO"
+        ],
+        "yahoo_ticker": "ALGO-USD"
+    },
+    "WLD": {
+        "name": "Worldcoin",
+        "keywords": [
+            "Worldcoin",
+            "WLD"
+        ],
+        "yahoo_ticker": "WLD-USD"
+    },
+    "KCS": {
+        "name": "KuCoin Token",
+        "keywords": [
+            "KuCoin Token",
+            "KCS"
+        ],
+        "yahoo_ticker": "KCS-USD"
+    },
+    "PENGU": {
+        "name": "Pudgy Penguins",
+        "keywords": [
+            "Pudgy Penguins",
+            "PENGU"
+        ],
+        "yahoo_ticker": "PENGU-USD"
+    },
+    "M": {
+        "name": "MemeCore",
+        "keywords": [
+            "MemeCore",
+            "M"
+        ],
+        "yahoo_ticker": "M-USD"
+    },
+    "RENDER": {
+        "name": "Render",
+        "keywords": [
+            "Render",
+            "RENDER"
+        ],
+        "yahoo_ticker": "RENDER-USD"
+    },
+    "SKY": {
+        "name": "Sky",
+        "keywords": [
+            "Sky",
+            "SKY"
+        ],
+        "yahoo_ticker": "SKY-USD"
+    },
+    "SEI": {
+        "name": "Sei",
+        "keywords": [
+            "Sei",
+            "SEI"
+        ],
+        "yahoo_ticker": "SEI-USD"
+    },
+    "TRUMP": {
+        "name": "OFFICIAL TRUMP",
+        "keywords": [
+            "OFFICIAL TRUMP",
+            "TRUMP"
+        ],
+        "yahoo_ticker": "TRUMP-USD"
+    },
+    "PUMP": {
+        "name": "Pump.fun",
+        "keywords": [
+            "Pump.fun",
+            "PUMP"
+        ],
+        "yahoo_ticker": "PUMP-USD"
+    },
+    "BONK": {
+        "name": "Bonk",
+        "keywords": [
+            "Bonk",
+            "BONK"
+        ],
+        "yahoo_ticker": "BONK-USD"
+    },
+    "FIL": {
+        "name": "Filecoin",
+        "keywords": [
+            "Filecoin",
+            "FIL"
+        ],
+        "yahoo_ticker": "FIL-USD"
+    },
+    "FLR": {
+        "name": "Flare",
+        "keywords": [
+            "Flare",
+            "FLR"
+        ],
+        "yahoo_ticker": "FLR-USD"
+    },
+    "JUP": {
+        "name": "Jupiter",
+        "keywords": [
+            "Jupiter",
+            "JUP"
+        ],
+        "yahoo_ticker": "JUP-USD"
+    },
+    "FDUSD": {
+        "name": "First Digital USD",
+        "keywords": [
+            "First Digital USD",
+            "FDUSD"
+        ],
+        "yahoo_ticker": "FDUSD-USD"
+    },
+    "FET": {
+        "name": "Artificial Superintelligence Alliance",
+        "keywords": [
+            "Artificial Superintelligence Alliance",
+            "FET"
+        ],
+        "yahoo_ticker": "FET-USD"
+    },
+    "FORM": {
+        "name": "Four",
+        "keywords": [
+            "Four",
+            "FORM"
+        ],
+        "yahoo_ticker": "FORM-USD"
+    },
+    "XDC": {
+        "name": "XDC Network",
+        "keywords": [
+            "XDC Network",
+            "XDC"
+        ],
+        "yahoo_ticker": "XDC-USD"
+    },
+    "INJ": {
+        "name": "Injective",
+        "keywords": [
+            "Injective",
+            "INJ"
+        ],
+        "yahoo_ticker": "INJ-USD"
+    },
+    "OP": {
+        "name": "Optimism",
+        "keywords": [
+            "Optimism",
+            "OP"
+        ],
+        "yahoo_ticker": "OP-USD"
+    },
+    "TIA": {
+        "name": "Celestia",
+        "keywords": [
+            "Celestia",
+            "TIA"
+        ],
+        "yahoo_ticker": "TIA-USD"
+    },
+    "QNT": {
+        "name": "Quant",
+        "keywords": [
+            "Quant",
+            "QNT"
+        ],
+        "yahoo_ticker": "QNT-USD"
+    },
+    "PYUSD": {
+        "name": "PayPal USD",
+        "keywords": [
+            "PayPal USD",
+            "PYUSD"
+        ],
+        "yahoo_ticker": "PYUSD-USD"
+    },
+    "STX": {
+        "name": "Stacks",
+        "keywords": [
+            "Stacks",
+            "STX"
+        ],
+        "yahoo_ticker": "STX-USD"
+    },
+    "CRV": {
+        "name": "Curve DAO Token",
+        "keywords": [
+            "Curve DAO Token",
+            "CRV"
+        ],
+        "yahoo_ticker": "CRV-USD"
+    },
+    "SPX": {
+        "name": "SPX6900",
+        "keywords": [
+            "SPX6900",
+            "SPX"
+        ],
+        "yahoo_ticker": "SPX-USD"
+    },
+    "LDO": {
+        "name": "Lido DAO",
+        "keywords": [
+            "Lido DAO",
+            "LDO"
+        ],
+        "yahoo_ticker": "LDO-USD"
+    },
+    "PAXG": {
+        "name": "PAX Gold",
+        "keywords": [
+            "PAX Gold",
+            "PAXG"
+        ],
+        "yahoo_ticker": "PAXG-USD"
+    },
+    "AERO": {
+        "name": "Aerodrome Finance",
+        "keywords": [
+            "Aerodrome Finance",
+            "AERO"
+        ],
+        "yahoo_ticker": "AERO-USD"
+    },
+    "IMX": {
+        "name": "Immutable",
+        "keywords": [
+            "Immutable",
+            "IMX"
+        ],
+        "yahoo_ticker": "IMX-USD"
+    },
+    "PYTH": {
+        "name": "Pyth Network",
+        "keywords": [
+            "Pyth Network",
+            "PYTH"
+        ],
+        "yahoo_ticker": "PYTH-USD"
+    },
+    "GRT": {
+        "name": "The Graph",
+        "keywords": [
+            "The Graph",
+            "GRT"
+        ],
+        "yahoo_ticker": "GRT-USD"
+    },
+    "KAIA": {
+        "name": "Kaia",
+        "keywords": [
+            "Kaia",
+            "KAIA"
+        ],
+        "yahoo_ticker": "KAIA-USD"
+    },
+    "XAUt": {
+        "name": "Tether Gold",
+        "keywords": [
+            "Tether Gold",
+            "XAUt"
+        ],
+        "yahoo_ticker": "XAUt-USD"
+    },
+    "CFX": {
+        "name": "Conflux",
+        "keywords": [
+            "Conflux",
+            "CFX"
+        ],
+        "yahoo_ticker": "CFX-USD"
+    },
+    "S": {
+        "name": "Sonic",
+        "keywords": [
+            "Sonic",
+            "S"
+        ],
+        "yahoo_ticker": "S-USD"
+    },
+    "RAY": {
+        "name": "Raydium",
+        "keywords": [
+            "Raydium",
+            "RAY"
+        ],
+        "yahoo_ticker": "RAY-USD"
+    },
+    "FLOKI": {
+        "name": "FLOKI",
+        "keywords": [
+            "FLOKI",
+            "FLOKI"
+        ],
+        "yahoo_ticker": "FLOKI-USD"
+    },
+    "CAKE": {
+        "name": "PancakeSwap",
+        "keywords": [
+            "PancakeSwap",
+            "CAKE"
+        ],
+        "yahoo_ticker": "CAKE-USD"
+    },
+    "NEXO": {
+        "name": "Nexo",
+        "keywords": [
+            "Nexo",
+            "NEXO"
+        ],
+        "yahoo_ticker": "NEXO-USD"
+    },
+    "ENS": {
+        "name": "Ethereum Name Service",
+        "keywords": [
+            "Ethereum Name Service",
+            "ENS"
+        ],
+        "yahoo_ticker": "ENS-USD"
+    },
+    "WIF": {
+        "name": "dogwifhat",
+        "keywords": [
+            "dogwifhat",
+            "WIF"
+        ],
+        "yahoo_ticker": "WIF-USD"
+    },
+    "PENDLE": {
+        "name": "Pendle",
+        "keywords": [
+            "Pendle",
+            "PENDLE"
+        ],
+        "yahoo_ticker": "PENDLE-USD"
+    },
+    "THETA": {
+        "name": "Theta Network",
+        "keywords": [
+            "Theta Network",
+            "THETA"
+        ],
+        "yahoo_ticker": "THETA-USD"
+    },
+    "XTZ": {
+        "name": "Tezos",
+        "keywords": [
+            "Tezos",
+            "XTZ"
+        ],
+        "yahoo_ticker": "XTZ-USD"
+    },
+    "FARTCOIN": {
+        "name": "Fartcoin",
+        "keywords": [
+            "Fartcoin",
+            "FARTCOIN"
+        ],
+        "yahoo_ticker": "FARTCOIN-USD"
+    },
+    "A": {
+        "name": "Vaulta",
+        "keywords": [
+            "Vaulta",
+            "A"
+        ],
+        "yahoo_ticker": "A-USD"
+    },
+    "RLUSD": {
+        "name": "Ripple USD",
+        "keywords": [
+            "Ripple USD",
+            "RLUSD"
+        ],
+        "yahoo_ticker": "RLUSD-USD"
+    },
+    "IOTA": {
+        "name": "IOTA",
+        "keywords": [
+            "IOTA",
+            "IOTA"
+        ],
+        "yahoo_ticker": "IOTA-USD"
+    },
+    "GALA": {
+        "name": "Gala",
+        "keywords": [
+            "Gala",
+            "GALA"
+        ],
+        "yahoo_ticker": "GALA-USD"
+    },
+    "SAND": {
+        "name": "The Sandbox",
+        "keywords": [
+            "The Sandbox",
+            "SAND"
+        ],
+        "yahoo_ticker": "SAND-USD"
+    },
+    "VIRTUAL": {
+        "name": "Virtuals Protocol",
+        "keywords": [
+            "Virtuals Protocol",
+            "VIRTUAL"
+        ],
+        "yahoo_ticker": "VIRTUAL-USD"
+    },
+    "ZEC": {
+        "name": "Zcash",
+        "keywords": [
+            "Zcash",
+            "ZEC"
+        ],
+        "yahoo_ticker": "ZEC-USD"
+    },
+    "JASMY": {
+        "name": "JasmyCoin",
+        "keywords": [
+            "JasmyCoin",
+            "JASMY"
+        ],
+        "yahoo_ticker": "JASMY-USD"
+    },
+    "JTO": {
+        "name": "Jito",
+        "keywords": [
+            "Jito",
+            "JTO"
+        ],
+        "yahoo_ticker": "JTO-USD"
+    },
+    "MORPHO": {
+        "name": "Morpho",
+        "keywords": [
+            "Morpho",
+            "MORPHO"
+        ],
+        "yahoo_ticker": "MORPHO-USD"
+    },
+    "AB": {
+        "name": "AB",
+        "keywords": [
+            "AB",
+            "AB"
+        ],
+        "yahoo_ticker": "AB-USD"
+    },
+    "FLOW": {
+        "name": "Flow",
+        "keywords": [
+            "Flow",
+            "FLOW"
+        ],
+        "yahoo_ticker": "FLOW-USD"
+    },
+    "B": {
+        "name": "BUILDon",
+        "keywords": [
+            "BUILDon",
+            "B"
+        ],
+        "yahoo_ticker": "B-USD"
+    },
+    "MANA": {
+        "name": "Decentraland",
+        "keywords": [
+            "Decentraland",
+            "MANA"
+        ],
+        "yahoo_ticker": "MANA-USD"
+    },
+    "BTT": {
+        "name": "BitTorrent [New]",
+        "keywords": [
+            "BitTorrent [New]",
+            "BTT"
+        ],
+        "yahoo_ticker": "BTT-USD"
+    },
+    "WAL": {
+        "name": "Walrus",
+        "keywords": [
+            "Walrus",
+            "WAL"
+        ],
+        "yahoo_ticker": "WAL-USD"
+    },
+    "DEXE": {
+        "name": "DeXe",
+        "keywords": [
+            "DeXe",
+            "DEXE"
+        ],
+        "yahoo_ticker": "DEXE-USD"
+    },
+    "SYRUP": {
+        "name": "Maple Finance",
+        "keywords": [
+            "Maple Finance",
+            "SYRUP"
+        ],
+        "yahoo_ticker": "SYRUP-USD"
+    },
+    "ETHFI": {
+        "name": "ether.fi",
+        "keywords": [
+            "ether.fi",
+            "ETHFI"
+        ],
+        "yahoo_ticker": "ETHFI-USD"
+    },
+    "BSV": {
+        "name": "Bitcoin SV",
+        "keywords": [
+            "Bitcoin SV",
+            "BSV"
+        ],
+        "yahoo_ticker": "BSV-USD"
+    },
+    "STRK": {
+        "name": "Starknet",
+        "keywords": [
+            "Starknet",
+            "STRK"
+        ],
+        "yahoo_ticker": "STRK-USD"
+    },
+    "TUSD": {
+        "name": "TrueUSD",
+        "keywords": [
+            "TrueUSD",
+            "TUSD",
+            "TrueUSD"
+        ],
+        "yahoo_ticker": "TUSD-USD"
+    },
+    "USDD": {
+        "name": "USDD",
+        "keywords": [
+            "USDD",
+            "USDD"
+        ],
+        "yahoo_ticker": "USDD-USD"
+    },
+    "DYDX": {
+        "name": "dYdX",
+        "keywords": [
+            "dYdX",
+            "DYDX"
+        ],
+        "yahoo_ticker": "DYDX-USD"
+    },
+    "NEO": {
+        "name": "Neo",
+        "keywords": [
+            "Neo",
+            "NEO"
+        ],
+        "yahoo_ticker": "NEO-USD"
+    },
+    "DEEP": {
+        "name": "DeepBook Protocol",
+        "keywords": [
+            "DeepBook Protocol",
+            "DEEP"
+        ],
+        "yahoo_ticker": "DEEP-USD"
+    },
+    "NFT": {
+        "name": "APENFT",
+        "keywords": [
+            "APENFT",
+            "NFT"
+        ],
+        "yahoo_ticker": "NFT-USD"
+    },
+    "BRETT": {
+        "name": "Brett (Based)",
+        "keywords": [
+            "Brett (Based)",
+            "BRETT"
+        ],
+        "yahoo_ticker": "BRETT-USD"
+    },
+    "ZRO": {
+        "name": "LayerZero",
+        "keywords": [
+            "LayerZero",
+            "ZRO"
+        ],
+        "yahoo_ticker": "ZRO-USD"
+    },
+    "RSR": {
+        "name": "Reserve Rights",
+        "keywords": [
+            "Reserve Rights",
+            "RSR"
+        ],
+        "yahoo_ticker": "RSR-USD"
+    },
+    "APE": {
+        "name": "ApeCoin",
+        "keywords": [
+            "ApeCoin",
+            "APE"
+        ],
+        "yahoo_ticker": "APE-USD"
+    },
+    "HNT": {
+        "name": "Helium",
+        "keywords": [
+            "Helium",
+            "HNT"
+        ],
+        "yahoo_ticker": "HNT-USD"
+    },
+    "ZK": {
+        "name": "ZKsync",
+        "keywords": [
+            "ZKsync",
+            "ZK"
+        ],
+        "yahoo_ticker": "ZK-USD"
+    },
+    "AR": {
+        "name": "Arweave",
+        "keywords": [
+            "Arweave",
+            "AR"
+        ],
+        "yahoo_ticker": "AR-USD"
+    },
+    "CORE": {
+        "name": "Core",
+        "keywords": [
+            "Core",
+            "CORE"
+        ],
+        "yahoo_ticker": "CORE-USD"
+    },
+    "EIGEN": {
+        "name": "EigenLayer",
+        "keywords": [
+            "EigenLayer",
+            "EIGEN"
+        ],
+        "yahoo_ticker": "EIGEN-USD"
+    },
+    "RUNE": {
+        "name": "THORChain",
+        "keywords": [
+            "THORChain",
+            "RUNE"
+        ],
+        "yahoo_ticker": "RUNE-USD"
+    },
+    "COMP": {
+        "name": "Compound",
+        "keywords": [
+            "Compound",
+            "COMP"
+        ],
+        "yahoo_ticker": "COMP-USD"
+    },
+    "KAVA": {
+        "name": "Kava",
+        "keywords": [
+            "Kava",
+            "KAVA"
+        ],
+        "yahoo_ticker": "KAVA-USD"
+    },
+    "AXS": {
+        "name": "Axie Infinity",
+        "keywords": [
+            "Axie Infinity",
+            "AXS"
+        ],
+        "yahoo_ticker": "AXS-USD"
+    },
+    "EGLD": {
+        "name": "MultiversX",
+        "keywords": [
+            "MultiversX",
+            "EGLD"
+        ],
+        "yahoo_ticker": "EGLD-USD"
+    },
+    "SUN": {
+        "name": "Sun [New]",
+        "keywords": [
+            "Sun [New]",
+            "SUN"
+        ],
+        "yahoo_ticker": "SUN-USD"
+    },
+    "CHZ": {
+        "name": "Chiliz",
+        "keywords": [
+            "Chiliz",
+            "CHZ"
+        ],
+        "yahoo_ticker": "CHZ-USD"
+    },
+    "XEC": {
+        "name": "eCash",
+        "keywords": [
+            "eCash",
+            "XEC"
+        ],
+        "yahoo_ticker": "XEC-USD"
+    },
+    "W": {
+        "name": "Wormhole",
+        "keywords": [
+            "Wormhole",
+            "W"
+        ],
+        "yahoo_ticker": "W-USD"
+    },
+    "SUPER": {
+        "name": "SuperVerse",
+        "keywords": [
+            "SuperVerse",
+            "SUPER"
+        ],
+        "yahoo_ticker": "SUPER-USD"
+    },
+    "XCN": {
+        "name": "Onyxcoin",
+        "keywords": [
+            "Onyxcoin",
+            "XCN"
+        ],
+        "yahoo_ticker": "XCN-USD"
+    },
+    "AIOZ": {
+        "name": "AIOZ Network",
+        "keywords": [
+            "AIOZ Network",
+            "AIOZ"
+        ],
+        "yahoo_ticker": "AIOZ-USD"
+    },
+    "GNO": {
+        "name": "Gnosis",
+        "keywords": [
+            "Gnosis",
+            "GNO"
+        ],
+        "yahoo_ticker": "GNO-USD"
+    },
+    "BEAM": {
+        "name": "Beam",
+        "keywords": [
+            "Beam",
+            "BEAM"
+        ],
+        "yahoo_ticker": "BEAM-USD"
+    },
+    "ZBCN": {
+        "name": "Zebec Network",
+        "keywords": [
+            "Zebec Network",
+            "ZBCN"
+        ],
+        "yahoo_ticker": "ZBCN-USD"
+    },
+    "CVX": {
+        "name": "Convex Finance",
+        "keywords": [
+            "Convex Finance",
+            "CVX"
+        ],
+        "yahoo_ticker": "CVX-USD"
+    },
+    "1INCH": {
+        "name": "1inch",
+        "keywords": [
+            "1inch",
+            "1INCH"
+        ],
+        "yahoo_ticker": "1INCH-USD"
+    },
+    "ATH": {
+        "name": "Aethir",
+        "keywords": [
+            "Aethir",
+            "ATH"
+        ],
+        "yahoo_ticker": "ATH-USD"
+    },
+    "WEMIX": {
+        "name": "WEMIX",
+        "keywords": [
+            "WEMIX",
+            "WEMIX"
+        ],
+        "yahoo_ticker": "WEMIX-USD"
+    },
+    "JST": {
+        "name": "JUST",
+        "keywords": [
+            "JUST",
+            "JST"
+        ],
+        "yahoo_ticker": "JST-USD"
+    },
+    "RON": {
+        "name": "Ronin",
+        "keywords": [
+            "Ronin",
+            "RON"
+        ],
+        "yahoo_ticker": "RON-USD"
+    },
+    "LUNC": {
+        "name": "Terra Classic",
+        "keywords": [
+            "Terra Classic",
+            "LUNC"
+        ],
+        "yahoo_ticker": "LUNC-USD"
+    },
+    "MOG": {
+        "name": "Mog Coin",
+        "keywords": [
+            "Mog Coin",
+            "MOG"
+        ],
+        "yahoo_ticker": "MOG-USD"
+    },
+    "MOVE": {
+        "name": "Movement",
+        "keywords": [
+            "Movement",
+            "MOVE"
+        ],
+        "yahoo_ticker": "MOVE-USD"
+    },
+    "LPT": {
+        "name": "Livepeer",
+        "keywords": [
+            "Livepeer",
+            "LPT"
+        ],
+        "yahoo_ticker": "LPT-USD"
+    },
+    "AXL": {
+        "name": "Axelar",
+        "keywords": [
+            "Axelar",
+            "AXL"
+        ],
+        "yahoo_ticker": "AXL-USD"
+    },
+    "TWT": {
+        "name": "Trust Wallet Token",
+        "keywords": [
+            "Trust Wallet Token",
+            "TWT"
+        ],
+        "yahoo_ticker": "TWT-USD"
+    },
+    "DASH": {
+        "name": "Dash",
+        "keywords": [
+            "Dash",
+            "DASH"
+        ],
+        "yahoo_ticker": "DASH-USD"
+    },
+    "BIO": {
+        "name": "Bio Protocol",
+        "keywords": [
+            "Bio Protocol",
+            "BIO"
+        ],
+        "yahoo_ticker": "BIO-USD"
+    },
+    "BERA": {
+        "name": "Berachain",
+        "keywords": [
+            "Berachain",
+            "BERA"
+        ],
+        "yahoo_ticker": "BERA-USD"
+    },
+    "QTUM": {
+        "name": "Qtum",
+        "keywords": [
+            "Qtum",
+            "QTUM"
+        ],
+        "yahoo_ticker": "QTUM-USD"
+    },
+    "CTC": {
+        "name": "Creditcoin",
+        "keywords": [
+            "Creditcoin",
+            "CTC"
+        ],
+        "yahoo_ticker": "CTC-USD"
+    },
+    "SNEK": {
+        "name": "Snek",
+        "keywords": [
+            "Snek",
+            "SNEK"
+        ],
+        "yahoo_ticker": "SNEK-USD"
+    },
+    "DCR": {
+        "name": "Decred",
+        "keywords": [
+            "Decred",
+            "DCR"
+        ],
+        "yahoo_ticker": "DCR-USD"
+    },
+    "AMP": {
+        "name": "Amp",
+        "keywords": [
+            "Amp",
+            "AMP"
+        ],
+        "yahoo_ticker": "AMP-USD"
+    },
+    "AKT": {
+        "name": "Akash Network",
+        "keywords": [
+            "Akash Network",
+            "AKT"
+        ],
+        "yahoo_ticker": "AKT-USD"
+    },
+    "SAFE": {
+        "name": "Safe",
+        "keywords": [
+            "Safe",
+            "SAFE"
+        ],
+        "yahoo_ticker": "SAFE-USD"
+    },
+    "TURBO": {
+        "name": "Turbo",
+        "keywords": [
+            "Turbo",
+            "TURBO"
+        ],
+        "yahoo_ticker": "TURBO-USD"
+    },
+    "KSM": {
+        "name": "Kusama",
+        "keywords": [
+            "Kusama",
+            "KSM"
+        ],
+        "yahoo_ticker": "KSM-USD"
+    },
+    "FTT": {
+        "name": "FTX Token",
+        "keywords": [
+            "FTX Token",
+            "FTT"
+        ],
+        "yahoo_ticker": "FTT-USD"
+    },
+    "MYX": {
+        "name": "MYX Finance",
+        "keywords": [
+            "MYX Finance",
+            "MYX"
+        ],
+        "yahoo_ticker": "MYX-USD"
+    },
+    "MX": {
+        "name": "MX Token",
+        "keywords": [
+            "MX Token",
+            "MX"
+        ],
+        "yahoo_ticker": "MX-USD"
+    },
+    "MOCA": {
+        "name": "Moca Network",
+        "keywords": [
+            "Moca Network",
+            "MOCA"
+        ],
+        "yahoo_ticker": "MOCA-USD"
+    },
+    "TOSHI": {
+        "name": "Toshi",
+        "keywords": [
+            "Toshi",
+            "TOSHI"
+        ],
+        "yahoo_ticker": "TOSHI-USD"
+    },
+    "FRAX": {
+        "name": "Frax (prev. FXS)",
+        "keywords": [
+            "Frax (prev. FXS)",
+            "FRAX"
+        ],
+        "yahoo_ticker": "FRAX-USD"
+    },
+    "IOTX": {
+        "name": "IoTeX",
+        "keywords": [
+            "IoTeX",
+            "IOTX"
+        ],
+        "yahoo_ticker": "IOTX-USD"
+    },
+    "MEW": {
+        "name": "cat in a dogs world",
+        "keywords": [
+            "cat in a dogs world",
+            "MEW"
+        ],
+        "yahoo_ticker": "MEW-USD"
+    },
+    "TFUEL": {
+        "name": "Theta Fuel",
+        "keywords": [
+            "Theta Fuel",
+            "TFUEL"
+        ],
+        "yahoo_ticker": "TFUEL-USD"
+    },
+    "EURC": {
+        "name": "EURC",
+        "keywords": [
+            "EURC",
+            "EURC"
+        ],
+        "yahoo_ticker": "EURC-USD"
+    },
+    "POPCAT": {
+        "name": "Popcat (SOL)",
+        "keywords": [
+            "Popcat (SOL)",
+            "POPCAT"
+        ],
+        "yahoo_ticker": "POPCAT-USD"
+    },
+    "KAITO": {
+        "name": "KAITO",
+        "keywords": [
+            "KAITO",
+            "KAITO"
+        ],
+        "yahoo_ticker": "KAITO-USD"
+    },
+    "VELO": {
+        "name": "Velo",
+        "keywords": [
+            "Velo",
+            "VELO"
+        ],
+        "yahoo_ticker": "VELO-USD"
+    },
+    "GLM": {
+        "name": "Golem",
+        "keywords": [
+            "Golem",
+            "GLM"
+        ],
+        "yahoo_ticker": "GLM-USD"
+    },
+    "ZORA": {
+        "name": "ZORA",
+        "keywords": [
+            "ZORA",
+            "ZORA"
+        ],
+        "yahoo_ticker": "ZORA-USD"
+    },
+    "ZRX": {
+        "name": "0x Protocol",
+        "keywords": [
+            "0x Protocol",
+            "ZRX"
+        ],
+        "yahoo_ticker": "ZRX-USD"
+    },
+    "SNX": {
+        "name": "Synthetix",
+        "keywords": [
+            "Synthetix",
+            "SNX"
+        ],
+        "yahoo_ticker": "SNX-USD"
+    },
+    "CKB": {
+        "name": "Nervos Network",
+        "keywords": [
+            "Nervos Network",
+            "CKB"
+        ],
+        "yahoo_ticker": "CKB-USD"
+    },
+    "SFP": {
+        "name": "SafePal",
+        "keywords": [
+            "SafePal",
+            "SFP"
+        ],
+        "yahoo_ticker": "SFP-USD"
+    },
+    "BAT": {
+        "name": "Basic Attention Token",
+        "keywords": [
+            "Basic Attention Token",
+            "BAT"
+        ],
+        "yahoo_ticker": "BAT-USD"
+    },
+    "MINA": {
+        "name": "Mina",
+        "keywords": [
+            "Mina",
+            "MINA"
+        ],
+        "yahoo_ticker": "MINA-USD"
+    },
+    "DOG": {
+        "name": "Dog (Bitcoin)",
+        "keywords": [
+            "Dog (Bitcoin)",
+            "DOG"
+        ],
+        "yahoo_ticker": "DOG-USD"
+    },
+    "ZIL": {
+        "name": "Zilliqa",
+        "keywords": [
+            "Zilliqa",
+            "ZIL"
+        ],
+        "yahoo_ticker": "ZIL-USD"
+    },
+    "OM": {
+        "name": "MANTRA",
+        "keywords": [
+            "MANTRA",
+            "OM"
+        ],
+        "yahoo_ticker": "OM-USD"
+    },
+    "PLUME": {
+        "name": "Plume",
+        "keywords": [
+            "Plume",
+            "PLUME"
+        ],
+        "yahoo_ticker": "PLUME-USD"
+    },
+    "CHEEMS": {
+        "name": "Cheems (cheems.pet)",
+        "keywords": [
+            "Cheems (cheems.pet)",
+            "CHEEMS"
+        ],
+        "yahoo_ticker": "CHEEMS-USD"
+    },
+    "PNUT": {
+        "name": "Peanut the Squirrel",
+        "keywords": [
+            "Peanut the Squirrel",
+            "PNUT"
+        ],
+        "yahoo_ticker": "PNUT-USD"
+    },
+    "GAS": {
+        "name": "Gas",
+        "keywords": [
+            "Gas",
+            "GAS"
+        ],
+        "yahoo_ticker": "GAS-USD"
+    },
+    "SUSHI": {
+        "name": "SushiSwap",
+        "keywords": [
+            "SushiSwap",
+            "SUSHI"
+        ],
+        "yahoo_ticker": "SUSHI-USD"
+    },
+    "USELESS": {
+        "name": "Useless Coin",
+        "keywords": [
+            "Useless Coin",
+            "USELESS"
+        ],
+        "yahoo_ticker": "USELESS-USD"
+    }
+}

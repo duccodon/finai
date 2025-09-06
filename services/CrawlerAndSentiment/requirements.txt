@@ -1,9 +1,32 @@
 fastapi==0.116.1
 uvicorn[standard]==0.35.0
 
-# Data Collection & Processing
-requests==2.31.0   
+# Core Dependencies (FastAPI 0.116.1 requirements)
+starlette==0.40.0  # Compatible with FastAPI 0.116.1 (>=0.40.0,<0.48.0)
+pydantic==2.10.3   # Latest stable with FastAPI 0.116.1
+typing-extensions==4.12.2
+
+# Data Collection & Processing  
+requests==2.32.3
 feedparser==6.0.11
 
-redis==6.0.0       
-python-dotenv==1.1.1
+# Redis & Configuration
+redis==5.2.1      # Updated to latest stable
+python-dotenv==1.0.1
+
+# Web Scraping & Automation Stack
+vaderSentiment==3.3.2
+beautifulsoup4==4.13.3
+cloudscraper==1.2.71
+fake-useragent==1.5.1
+
+# Selenium & Browser Automation
+seleniumbase==4.35.0  # Latest compatible version
+
+# ScrapeGraphAI - Separate due to potential conflicts
+scrapegraphai==1.30.0
+
+# Utility Libraries
+packaging==24.2
+apscheduler==3.10.4
+python-dateutil==2.9.0.post0
