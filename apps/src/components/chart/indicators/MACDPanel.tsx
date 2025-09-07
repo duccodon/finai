@@ -203,14 +203,14 @@ export const MACDPanel: React.FC<Props> = ({
                 className="inline-block h-2 w-4 rounded"
                 style={{ background: '#2962FF' }}
               />
-              <span>MACD {fast}</span>
+              <span>MACD</span>
             </div>
             <div className="flex items-center gap-1">
               <span
                 className="inline-block h-2 w-4 rounded"
                 style={{ background: '#EF6C00' }}
               />
-              <span>Signal {slow}</span>
+              <span>Signal</span>
             </div>
           </div>
         </div>
