@@ -126,7 +126,8 @@ export class UserService {
     }
 
     // dob: if present in DTO, allow clearing (null/empty) or set Date
-    if (Object.prototype.hasOwnProperty.call(payload, 'dob')) {
+    // dob
+    if (payload.dob !== undefined) {
       const rawDob = payload['dob'];
       if (rawDob === null || rawDob === '') {
         data.dob = null;
@@ -137,27 +138,20 @@ export class UserService {
       }
     }
 
-    // password: if present, require oldPassword, validate old password and hash new one
-    if (Object.prototype.hasOwnProperty.call(payload, 'password')) {
-      const newPass = payload['password'];
+    // password: chỉ vào nhánh khi newPass là string (được gửi thật sự)
+    const newPass = payload['password'];
+    if (typeof newPass === 'string') {
       const oldPass = payload['oldPassword'];
-
-      // require old password to be provided when changing password
       if (!oldPass || typeof oldPass !== 'string') {
         throw new BadRequestException('Old password is required to change password');
       }
-
-      // verify old password matches current stored password
+      if (newPass.length < 6) {
+        throw new BadRequestException('Password must be at least 6 characters');
+      }
       const match = await bcrypt.compare(oldPass, exists.password);
       if (!match) {
         throw new BadRequestException('Old password is incorrect');
       }
-
-      // validate new password
-      if (!newPass || typeof newPass !== 'string' || newPass.length < 6) {
-        throw new BadRequestException('Password must be at least 6 characters');
-      }
-
       data.password = await bcrypt.hash(newPass, 10);
     }
 

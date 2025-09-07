@@ -108,8 +108,6 @@ services:
       - '9000:9000'
     volumes:
       - ./services/_Predict:/app # bind mount code + .env + requirements.txt
-    env_file:
-      - ./services/_Predict/.env # load biến từ file .env (MONGO_URI, JWT_SECRET, v.v.)
     command: python -m predict.app
 networks:
   news-scraper-network:

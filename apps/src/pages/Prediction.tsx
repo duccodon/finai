@@ -16,8 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { runPredict } from '@/services/predictService';
 
-const API_URL = '/api/predict/run'; // đổi sang '/predict' nếu backend mount khác
+const API_URL = '/api/predict/run';
 const SUPPORTED_INTERVALS = ['15m', '1h', '4h', '1d'];
 const SUPPORTED_SYMBOLS = ['BTCUSDT', 'LTCUSDT'] as const;
 
@@ -36,13 +37,18 @@ function summarizeTrend(json: any): Trend | null {
     if (!Number.isFinite(lastClose) || preds.length === 0) return null;
 
     // đếm hướng theo field `direction` nếu có, fallback bằng dấu của (pred_close - lastClose)
-    let up = 0, down = 0, flat = 0, totalDelta = 0;
+    let up = 0,
+      down = 0,
+      flat = 0,
+      totalDelta = 0;
     for (const p of preds) {
       const predClose = Number(p?.pred_close);
       let dir = (p?.direction ?? '').toString().toUpperCase();
       const delta = Number.isFinite(Number(p?.delta))
         ? Number(p.delta)
-        : (Number.isFinite(predClose) ? (predClose - lastClose) : 0);
+        : Number.isFinite(predClose)
+        ? predClose - lastClose
+        : 0;
       if (!Number.isFinite(predClose)) continue;
 
       totalDelta += delta;
@@ -55,11 +61,7 @@ function summarizeTrend(json: any): Trend | null {
     }
 
     const label: Trend['label'] =
-      Math.abs(totalDelta) < 1e-6
-        ? 'FLAT'
-        : totalDelta > 0
-        ? 'UP'
-        : 'DOWN';
+      Math.abs(totalDelta) < 1e-6 ? 'FLAT' : totalDelta > 0 ? 'UP' : 'DOWN';
 
     const sign = totalDelta > 0 ? '+' : totalDelta < 0 ? '−' : '';
     const absDelta = Math.abs(totalDelta).toLocaleString();
@@ -73,7 +75,8 @@ function summarizeTrend(json: any): Trend | null {
 }
 
 export default function Prediction() {
-  const [symbol, setSymbol] = useState<(typeof SUPPORTED_SYMBOLS)[number]>('BTCUSDT');
+  const [symbol, setSymbol] =
+    useState<(typeof SUPPORTED_SYMBOLS)[number]>('BTCUSDT');
   const [interval, setInterval] = useState('1d'); // bạn đang dùng mẫu 1d
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,16 +91,36 @@ export default function Prediction() {
     if (!containerRef.current || chartRef.current) return;
 
     const chart = createChart(containerRef.current, {
-      layout: { background: { type: ColorType.Solid, color: '#fff' }, textColor: '#828282' },
-      grid: { vertLines: { color: '#d7d8d9' }, horzLines: { color: '#d7d8d9' } },
+      layout: {
+        background: { type: ColorType.Solid, color: '#fff' },
+        textColor: '#828282',
+      },
+      grid: {
+        vertLines: { color: '#d7d8d9' },
+        horzLines: { color: '#d7d8d9' },
+      },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: '#6a6d78', width: 1, style: 2, labelBackgroundColor: '#3a3e4b' },
-        horzLine: { color: '#6a6d78', width: 1, style: 2, labelBackgroundColor: '#3a3e4b' },
+        vertLine: {
+          color: '#6a6d78',
+          width: 1,
+          style: 2,
+          labelBackgroundColor: '#3a3e4b',
+        },
+        horzLine: {
+          color: '#6a6d78',
+          width: 1,
+          style: 2,
+          labelBackgroundColor: '#3a3e4b',
+        },
       },
       width: containerRef.current.clientWidth,
       height: 420,
-      timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#d7d8d9' },
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        borderColor: '#d7d8d9',
+      },
       rightPriceScale: { borderColor: '#d7d8d9' },
     });
 
@@ -108,7 +131,9 @@ export default function Prediction() {
 
     const onResize = () => {
       if (containerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: containerRef.current.clientWidth });
+        chartRef.current.applyOptions({
+          width: containerRef.current.clientWidth,
+        });
       }
     };
     window.addEventListener('resize', onResize);
@@ -125,17 +150,13 @@ export default function Prediction() {
     setLoading(true);
     setError(null);
     try {
-      const safeInterval = SUPPORTED_INTERVALS.includes(interval) ? interval : '1d';
+      const safeInterval = SUPPORTED_INTERVALS.includes(interval)
+        ? interval
+        : '1d';
 
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          symbol,
-          interval: safeInterval,
-          seq_len: 100,
-          force_train: false,
-        }),
+      const res = await runPredict({
+        symbol,
+        interval: safeInterval,
       });
 
       const text = await res.text();
@@ -145,7 +166,9 @@ export default function Prediction() {
       console.log('[predict response]', json);
 
       // —— map dữ liệu vào line
-      const predictions = Array.isArray(json?.predictions) ? json.predictions : [];
+      const predictions = Array.isArray(json?.predictions)
+        ? json.predictions
+        : [];
       const data: LinePoint[] = predictions
         .map((p: any) => ({
           time: toUTCSecFromISO(p.t),
@@ -183,7 +206,11 @@ export default function Prediction() {
 
   // màu xu hướng
   const trendColor =
-    trend?.label === 'UP' ? 'text-green-600' : trend?.label === 'DOWN' ? 'text-red-600' : 'text-gray-600';
+    trend?.label === 'UP'
+      ? 'text-green-600'
+      : trend?.label === 'DOWN'
+      ? 'text-red-600'
+      : 'text-gray-600';
 
   return (
     <div className="space-y-4">
@@ -198,7 +225,12 @@ export default function Prediction() {
 
         <div className="flex items-center gap-2">
           {/* chỉ cho 2 lựa chọn BTCUSDT / LTCUSDT */}
-          <Select value={symbol} onValueChange={(v) => setSymbol(v as (typeof SUPPORTED_SYMBOLS)[number])}>
+          <Select
+            value={symbol}
+            onValueChange={(v) =>
+              setSymbol(v as (typeof SUPPORTED_SYMBOLS)[number])
+            }
+          >
             <SelectTrigger className="w-36">
               <SelectValue placeholder={symbol} />
             </SelectTrigger>
@@ -247,7 +279,8 @@ export default function Prediction() {
         <p className="text-red-600 text-sm">⚠️ {error}</p>
       ) : (
         <p className="text-xs text-gray-500">
-          Dữ liệu hiển thị từ <code>last.close</code> và chuỗi <code>pred_close</code> theo <code>t</code> (ISO).
+          Dữ liệu hiển thị từ <code>last.close</code> và chuỗi{' '}
+          <code>pred_close</code> theo <code>t</code> (ISO).
         </p>
       )}
     </div>
