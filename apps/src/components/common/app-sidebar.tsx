@@ -36,16 +36,6 @@ const data = {
       logo: GalleryVerticalEnd,
       plan: 'HCMUS',
     },
-    {
-      name: 'FinAI',
-      logo: GalleryVerticalEnd,
-      plan: 'HCMUS',
-    },
-    {
-      name: 'FinAI',
-      logo: GalleryVerticalEnd,
-      plan: 'HCMUS',
-    },
   ],
   navMain: [
     {
@@ -136,7 +126,7 @@ const data = {
   ],
   projects: [
     {
-      name: 'Home',
+      name: 'Chart',
       url: '/', // route về trang Home
       icon: Frame,
     },

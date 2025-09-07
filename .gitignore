@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 .env
 _pycache/
+*.pyc
+*.pyo
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
