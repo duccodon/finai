@@ -14,7 +14,7 @@ GRAPH_CONFIG = {
         "model": "ollama/" + LLM_MODEL,
         "temperature": 0,
         "format": "json",
-        "base_url": "http://localhost:11434"
+        "base_url": "http://ollama:11434"
     },
     "verbose": True
 }
@@ -25,7 +25,7 @@ GRAPH_CONFIG = {
 #link = "https://finance.yahoo.com/news/eric-trump-advised-japanese-bitcoin-010054830.html?.tsrc=rss"
 #link = "https://www.coinspeaker.com/metaplanet-stock-down-5-percent-20k-btc/?.tsrc=rss"
 #link = "https://news.google.com/rss/articles/CBMikgFBVV95cUxNVnZJYXFJVnE1dUxhUWYwd2R1YXdjUUhnaTczZnh2MWRkYi1tN21ocDhCQVlZdWdJV0RTLWkwUXBCX3FOZWhrR3RKRXJkbWpWRW1qYkNIVnlTQVRLb2t4bXh6OU1oTFhpcGpYbzJaZThZVHk3Wm45OVgyYkdrbE40TlBuYzNQU2ZEb1czSmI3Vlg2UQ?oc=5"
-link = "https://cointelegraph.com/news/crypto-market-buy-the-dip-calls-signals-downside-santiment"
+link = "https://www.coindesk.com/markets/2025/09/07/bitcoin-illiquid-supply-hits-record-14-3m-as-long-term-holders-continue-to-accumulate"
 
 #dont work
 #link = "https://www.thestreet.com/crypto/markets/eric-trump-linked-firm-becomes-6th-largest-bitcoin-holder?.tsrc=rss"
@@ -71,7 +71,9 @@ def clean_html_for_article(raw_html: str) -> str:
     return f"<title>{title_text}</title>\n<content>{article_text}</content>"
 
 def extract_article_content(content: str):
-    """Use ScrapeGraphAI to extract clean article content."""
+    """ Use ScrapeGraphAI to extract clean article content. Must use the latest version of scrapegraphai to test 
+        (for building service, may need to lower the version for compatibility).
+    """
     try:
         prompt = """
         You are given cleaned HTML of a news article.
@@ -96,16 +98,33 @@ def extract_article_content(content: str):
         if isinstance(result, dict):
             if "content" in result and isinstance(result["content"], dict):
                 return {
-                    "title": result["content"].get("title", ""),
+                    "title": result["content"].get("title", "No Title Found"),
                     "content": result["content"].get("content", "")
                 }
-            return result
+            return {
+                "title": result.get("title", "No Title Found"),
+                "content": result.get("content", "")
+            }
         else:
-            print(f"Unexpected format: {result}")
-            return {"title": "", "content": ""}
+            print(f"Unexpected format from ScrapeGraphAI: {result}")
+            # Fallback: Parse the input content manually
+            soup = BeautifulSoup(content, "html.parser")
+            title = soup.find("title")
+            content = soup.find("content")
+            return {
+                "title": title.get_text(strip=True) if title else "No Title Found",
+                "content": content.get_text(strip=True) if content else ""
+            }
     except Exception as e:
-        print(f"Error: {e}")
-        return {"title": "", "content": ""}
+        print(f"Error in ScrapeGraphAI: {e}")
+        # Fallback: Parse the input content manually
+        soup = BeautifulSoup(content, "html.parser")
+        title = soup.find("title")
+        content = soup.find("content")
+        return {
+            "title": title.get_text(strip=True) if title else "No Title Found",
+            "content": content.get_text(strip=True) if content else ""
+        }
 
 def get_redirected_url(google_rss_url: str) -> str:
     """Get the final redirected URL after following all redirects."""

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Body, HTTPException, Depends
-from app.controllers.newsController import load_crypto_map, collect_crypto_news
-from app.controllers.crawlController import crawl_article
+from app.controllers.newsController import collect_crypto_news
 
 BASE_URL = "/news"
 
@@ -13,19 +12,11 @@ async def get_latest_news(asset_symbol: str):
     Supports multiple symbols separated by commas (e.g., BTCUSDT,ETHUSDT).
     """
     try:
-        crypto_map = load_crypto_map()
         symbols = asset_symbol.split(",")
-        results = collect_crypto_news(symbols, crypto_map)
+        results = collect_crypto_news(symbols)
         response_data = {}
         for symbol in symbols:
-            if not results.get(symbol):
-                response_data[symbol] = []
-                continue
-            # Enhance with crawled content
-            for entry in results[symbol]:
-                if not entry.get("full_content"):
-                    entry.update(crawl_article(entry["link"]))
-            response_data[symbol] = results[symbol]
+            response_data[symbol] = results.get(symbol, [])
         if not any(response_data.values()):
             raise HTTPException(status_code=404, detail="No news found for the given symbols")
         return {"symbols": response_data}

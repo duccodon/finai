@@ -10,9 +10,18 @@ TOP_CURRENCIES = 200
 CMC_API_KEY = "41bebb62-aabc-45d5-8fae-e154281f76a4"
 
 def fetch_top_cryptos():
+    """
+    Fetch top 200 cryptocurrencies from CoinMarketCap API.
+    Returns a list of dictionaries with name and symbol.
+    """
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
     headers = {"X-CMC_PRO_API_KEY": CMC_API_KEY}
-    params = {"start": 1, "limit": TOP_CURRENCIES, "convert": "USD"}
+    params = {
+        "start": 1,
+        "limit": TOP_CURRENCIES,
+        "convert": "USD"
+    }
+
     try:
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()

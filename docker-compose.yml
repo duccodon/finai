@@ -39,6 +39,22 @@ services:
       - redis
     volumes:
       - ./services/CrawlerAndSentiment:/app
+    networks:
+      - default
+      - news-scraper-network
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_PORT=11434
+    networks:
+      - news-scraper-network
+    command: serve
   auth:
     build:
       context: ./services/auth
@@ -95,7 +111,11 @@ services:
     env_file:
       - ./services/_Predict/.env # load biến từ file .env (MONGO_URI, JWT_SECRET, v.v.)
     command: python -m predict.app
+networks:
+  news-scraper-network:
+    driver: bridge
 volumes:
   mongo_data:
   pgdata:
   redis_data:
+  ollama_data:

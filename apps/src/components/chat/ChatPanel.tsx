@@ -1,65 +1,89 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, X, ArrowUpRight } from 'lucide-react';
+import { MessageSquare, X, ArrowUpRight, Trash2 } from 'lucide-react';
 
 type ChatPanelProps = {
   symbol?: string;
 };
 
+interface NewsItem {
+  source: string;
+  title: string;
+  link: string;
+  published: string;
+  summary: string;
+  cleanText: string;
+  sentiment: {
+    compound_score: number;
+    label: string;
+    details: {
+      neg: number;
+      neu: number;
+      pos: number;
+      compound: number;
+    };
+  };
+  symbol: string;
+  timestamp: number; // Add timestamp for sorting and expiration
+}
+
+interface ApiResponse {
+  symbols: {
+    [symbol: string]: Omit<NewsItem, 'symbol' | 'timestamp'>;
+  };
+}
+
+// LocalStorage key
+const NEWS_STORAGE_KEY = 'crypto_news_data';
+
 const ChatPanel = ({ symbol }: ChatPanelProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [newsData, setNewsData] = useState([
-    {
-      title: 'Crypto ‘buy the dip’ calls are spiking, which may signal more downside',
-      content: 'Crypto ‘buy the dip’ calls are spiking, which may signal more downside Buy the\ndip mentions on social media are climbing as Bitcoin falls, which could be a\nsign the market hasn’t bottomed yet, Santiment says.',
-      link: 'https://cointelegraph.com/news/crypto-market-buy-the-dip-calls-signals-downside-santiment',
-      tags: ['BTCUSDT']
-    },
-    {
-      title: 'Ethereum Foundation Announces Major Protocol Upgrade',
-      content: 'The Ethereum Foundation has revealed plans for a significant protocol upgrade that will improve scalability and reduce gas fees.',
-      link: 'https://example.com/ethereum-upgrade',
-      tags: ['ETHUSDT', 'Blockchain']
-    },
-    {
-      title: 'NFT Market Sees Resurgence After Months of Decline',
-      content: 'After a prolonged bear market, NFT trading volumes have increased by 40% in the past month, signaling renewed interest.',
-      link: 'https://example.com/nft-resurgence',
-      tags: ['NFT', 'Market']
-    },
-    {
-      title: 'DeFi Protocols Integrate New Security Measures',
-      content: 'Leading DeFi platforms have implemented enhanced security protocols following recent exploits in the ecosystem.',
-      link: 'https://example.com/defi-security',
-      tags: ['DeFi', 'Security']
-    },
-    {
-      title: 'Central Banks Exploring CBDC Implementation',
-      content: 'Several major central banks have accelerated their research and development of Central Bank Digital Currencies.',
-      link: 'https://example.com/cbdc-update',
-      tags: ['CBDC', 'Regulation']
-    },
-    {
-      title: 'Crypto Regulation Framework Advances in Key Markets',
-      content: 'Comprehensive cryptocurrency regulation frameworks are moving forward in several major economies, bringing clarity to the industry.',
-      link: 'https://example.com/crypto-regulation',
-      tags: ['Regulation', 'Policy']
-    },
-    {
-      title: 'Bitcoin Mining Difficulty Reaches All-Time High',
-      content: 'Bitcoin mining difficulty has surged to a new record high, indicating increased competition and network security.',
-      link: 'https://example.com/mining-difficulty',
-      tags: ['BTCUSDT', 'Mining']
-    },
-    {
-      title: 'Stablecoin Adoption Grows in Emerging Markets',
-      content: 'Stablecoins are seeing increased adoption in countries with high inflation rates as a store of value.',
-      link: 'https://example.com/stablecoin-adoption',
-      tags: ['Stablecoin', 'Adoption']
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
+
+  // Load news data from localStorage on component mount
+  useEffect(() => {
+    const loadStoredNews = () => {
+      try {
+        const storedNews = localStorage.getItem(NEWS_STORAGE_KEY);
+        if (storedNews) {
+          const parsedNews = JSON.parse(storedNews);
+          
+          // Optional: Clean up old articles (older than 7 days)
+          const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+          const filteredNews = parsedNews.filter((item: NewsItem) => 
+            item.timestamp > oneWeekAgo
+          );
+          
+          setNewsData(filteredNews);
+          console.log("Loaded news from localStorage:", filteredNews.length, "articles");
+        }
+      } catch (error) {
+        console.error("Error loading news from localStorage:", error);
+        // Clear corrupted data
+        localStorage.removeItem(NEWS_STORAGE_KEY);
+      }
+    };
+
+    loadStoredNews();
+  }, []);
+
+  // Save news data to localStorage whenever it changes
+  useEffect(() => {
+    const saveNewsToStorage = () => {
+      try {
+        localStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify(newsData));
+        console.log("Saved news to localStorage:", newsData.length, "articles");
+      } catch (error) {
+        console.error("Error saving news to localStorage:", error);
+      }
+    };
+
+    if (newsData.length > 0) {
+      saveNewsToStorage();
     }
-  ]);
+  }, [newsData]);
 
   const fetchNews = async () => {
     console.log("Fetching news for symbol:", symbol);
@@ -74,30 +98,53 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
 
       const response = await fetch(url);
       console.log("Response status:", response.status);
-      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-
-      // First check the content type
-      const contentType = response.headers.get('content-type');
-      console.log("Content-Type:", contentType);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Check if response is JSON before parsing
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        console.log("News data:", data);
-      } else {
-        // If not JSON, read as text to see what we're getting
-        const text = await response.text();
-        console.log("Non-JSON response:", text.substring(0, 200)); // First 200 chars
-        throw new Error(`Expected JSON but got: ${contentType}`);
+      const data: ApiResponse = await response.json();
+      console.log("News data:", data);
+
+      // Update newsData with the new article(s)
+      if (data.symbols && data.symbols[symbol]) {
+        const newArticle = {
+          ...data.symbols[symbol],
+          symbol: symbol,
+          timestamp: Date.now() // Add current timestamp
+        };
+
+        setNewsData(prevData => {
+          // Check if this article already exists (by link)
+          const articleExists = prevData.some(item => item.link === newArticle.link);
+          
+          if (articleExists) {
+            console.log("Article already exists, not adding duplicate");
+            return prevData;
+          }
+          
+          // Add new article to the beginning of the array (most recent first)
+          const updatedData = [newArticle, ...prevData];
+          
+          // Limit to last 50 articles to prevent storage issues
+          return updatedData.slice(0, 50);
+        });
       }
     } catch (error) {
       console.error("Error fetching news:", error);
     }
   };
+
+  const clearNews = () => {
+    if (window.confirm("Are you sure you want to clear all news articles?")) {
+      setNewsData([]);
+      localStorage.removeItem(NEWS_STORAGE_KEY);
+      console.log("Cleared all news articles");
+    }
+  };
+
+  // Sort news by timestamp (newest first)
+  const sortedNews = [...newsData].sort((a, b) => b.timestamp - a.timestamp);
 
   return (
     <>
@@ -120,34 +167,50 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
         <div className="flex flex-col h-full">
           <div className="p-1 pl-4 border-b flex justify-between items-center">
             <h3 className="font-semibold">News</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={clearNews}
+                title="Clear all news"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Fixed Scroll Area with proper height calculation */}
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full">
               <div className="p-4 space-y-4">
-                {newsData.map((news, index) => (
-                  <Card key={index} className="rounded-lg">
+                {sortedNews.map((news, index) => (
+                  <Card key={`${news.link}-${news.timestamp}`} className="rounded-lg">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base">{news.title}</CardTitle>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {news.tags.map((tag, i) => (
-                          <span key={i} className="text-xs bg-muted px-2 py-1 rounded-md">
-                            {tag}
-                          </span>
-                        ))}
+                        <span className="text-xs bg-muted px-2 py-1 rounded-md">
+                          {news.symbol}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <p className="text-xs text-muted-foreground">
+                          Published: {news.published}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(news.timestamp).toLocaleDateString()}
+                        </p>
                       </div>
                     </CardHeader>
                     <CardContent className="pb-4">
                       <p className="text-sm text-muted-foreground mb-3">
-                        {news.content.split(/\s+/).slice(0, 30).join(' ')}...
+                        {news.cleanText.split(/\s+/).slice(0, 30).join(' ')}...
                       </p>
                       <Button
                         variant="outline"
@@ -161,6 +224,13 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
                     </CardContent>
                   </Card>
                 ))}
+                {sortedNews.length === 0 && (
+                  <div className="text-center text-muted-foreground py-8">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No news yet</p>
+                    <p className="text-sm">Click "Fetch News" to get started</p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
           </div>

@@ -24,7 +24,8 @@ fake-useragent==1.5.1
 seleniumbase==4.35.0  # Latest compatible version
 
 # ScrapeGraphAI - Separate due to potential conflicts
-scrapegraphai==1.30.0
+#scrapegraphai==1.30.0 # works fine but error: Error in ScrapeGraphAI: 'FetchNode' object has no attribute 'update_state'
+scrapegraphai==1.62.0 
 
 # Utility Libraries
 packaging==24.2
