@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, X, ArrowUpRight, Trash2 } from 'lucide-react';
-
+import { getAccessToken } from '@/lib/http'; // lấy token từ http.ts
 type ChatPanelProps = {
   symbol?: string;
 };
@@ -49,18 +49,22 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
         const storedNews = localStorage.getItem(NEWS_STORAGE_KEY);
         if (storedNews) {
           const parsedNews = JSON.parse(storedNews);
-          
+
           // Optional: Clean up old articles (older than 7 days)
-          const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-          const filteredNews = parsedNews.filter((item: NewsItem) => 
-            item.timestamp > oneWeekAgo
+          const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+          const filteredNews = parsedNews.filter(
+            (item: NewsItem) => item.timestamp > oneWeekAgo
           );
-          
+
           setNewsData(filteredNews);
-          console.log("Loaded news from localStorage:", filteredNews.length, "articles");
+          console.log(
+            'Loaded news from localStorage:',
+            filteredNews.length,
+            'articles'
+          );
         }
       } catch (error) {
-        console.error("Error loading news from localStorage:", error);
+        console.error('Error loading news from localStorage:', error);
         // Clear corrupted data
         localStorage.removeItem(NEWS_STORAGE_KEY);
       }
@@ -74,9 +78,9 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
     const saveNewsToStorage = () => {
       try {
         localStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify(newsData));
-        console.log("Saved news to localStorage:", newsData.length, "articles");
+        console.log('Saved news to localStorage:', newsData.length, 'articles');
       } catch (error) {
-        console.error("Error saving news to localStorage:", error);
+        console.error('Error saving news to localStorage:', error);
       }
     };
 
@@ -86,60 +90,62 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
   }, [newsData]);
 
   const fetchNews = async () => {
-    console.log("Fetching news for symbol:", symbol);
+    console.log('Fetching news for symbol:', symbol);
     try {
       if (!symbol) {
-        console.error("No symbol provided");
+        console.error('No symbol provided');
         return;
       }
 
       const url = `/api/news/${symbol}`;
-      console.log("Full URL:", url);
+      console.log('Full URL:', url);
 
       const response = await fetch(url);
-      console.log("Response status:", response.status);
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data: ApiResponse = await response.json();
-      console.log("News data:", data);
+      console.log('News data:', data);
 
       // Update newsData with the new article(s)
       if (data.symbols && data.symbols[symbol]) {
         const newArticle = {
           ...data.symbols[symbol],
           symbol: symbol,
-          timestamp: Date.now() // Add current timestamp
+          timestamp: Date.now(), // Add current timestamp
         };
 
-        setNewsData(prevData => {
+        setNewsData((prevData) => {
           // Check if this article already exists (by link)
-          const articleExists = prevData.some(item => item.link === newArticle.link);
-          
+          const articleExists = prevData.some(
+            (item) => item.link === newArticle.link
+          );
+
           if (articleExists) {
-            console.log("Article already exists, not adding duplicate");
+            console.log('Article already exists, not adding duplicate');
             return prevData;
           }
-          
+
           // Add new article to the beginning of the array (most recent first)
           const updatedData = [newArticle, ...prevData];
-          
+
           // Limit to last 50 articles to prevent storage issues
           return updatedData.slice(0, 50);
         });
       }
     } catch (error) {
-      console.error("Error fetching news:", error);
+      console.error('Error fetching news:', error);
     }
   };
 
   const clearNews = () => {
-    if (window.confirm("Are you sure you want to clear all news articles?")) {
+    if (window.confirm('Are you sure you want to clear all news articles?')) {
       setNewsData([]);
       localStorage.removeItem(NEWS_STORAGE_KEY);
-      console.log("Cleared all news articles");
+      console.log('Cleared all news articles');
     }
   };
 
@@ -148,11 +154,7 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <Button variant="outline" size="icon" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? (
           <X className="h-4 w-4" />
         ) : (
@@ -161,8 +163,9 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
       </Button>
 
       <div
-        className={`fixed right-0 top-0 h-full w-80 border-l bg-background shadow-lg transition-transform duration-300 z-10 ${isOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
+        className={`fixed right-0 top-0 h-full w-80 border-l bg-background shadow-lg transition-transform duration-300 z-10 ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       >
         <div className="flex flex-col h-full">
           <div className="p-1 pl-4 border-b flex justify-between items-center">
@@ -191,7 +194,10 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
             <ScrollArea className="h-full">
               <div className="p-4 space-y-4">
                 {sortedNews.map((news, index) => (
-                  <Card key={`${news.link}-${news.timestamp}`} className="rounded-lg">
+                  <Card
+                    key={`${news.link}-${news.timestamp}`}
+                    className="rounded-lg"
+                  >
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base">{news.title}</CardTitle>
                       <div className="flex flex-wrap gap-1 mt-2">
@@ -236,7 +242,9 @@ const ChatPanel = ({ symbol }: ChatPanelProps) => {
           </div>
 
           <div className="p-4 flex justify-center">
-            <Button className="w-full" onClick={fetchNews}>Fetch News</Button>
+            <Button className="w-full" onClick={fetchNews}>
+              Fetch News
+            </Button>
           </div>
         </div>
       </div>
